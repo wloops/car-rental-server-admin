@@ -9,24 +9,29 @@
           @load="onLoad"
         >
           <van-grid :gutter="15" :column-num="1">
-            <van-grid-item v-for="item in list" :key="item">
+            <van-grid-item v-for="item in list" :key="item.orderNumber">
               <div class="orderItem">
                 <div class="useStatus">
-                  <span class="orderTopText">***单位</span>
-                  <span class="orderTopText">2021-12-21 12:19:36</span>
-                  <span class="orderTopText">待取车</span>
+                  <span class="orderTopText">{{ item.contactName }}</span>
+                  <span class="orderTopText">{{ item.orderTime }}</span>
+                  <span class="orderTopText">{{ item.useStatus }}</span>
                 </div>
                 <div class="orderInfo">
-                  <p>订单编号 : 161344262346</p>
-                  <p>用车车型 : 雪佛兰新科鲁兹</p>
-                  <p>用车时间 : 2021-12-21至2021-12-21（2天）</p>
-                  <p>订单金额 : ￥178</p>
-                  <p>是否带司机 : 是</p>
-                  <p>联系人 : 张三</p>
-                  <p>电话 : 18933552324</p>
-                  <p>接车地址 : XXXX</p>
+                  <p>订单编号 : {{ item.orderNumber }}</p>
+                  <p>用车车型 : {{ item.carType }}</p>
+                  <p>用车时间 : {{ item.useCarTime }}</p>
+                  <p>订单金额 : {{ item.orderMoney }}</p>
+                  <p>是否带司机 : {{ item.isDriver }}</p>
+                  <p>联系人 :{{ item.contactName }}</p>
+                  <p>电话 : {{ item.contactPhone }}</p>
+                  <p>接车地址 : {{ item.address }}</p>
                 </div>
-                <div class="orderBtn">
+                <div class="orderBtn returnCar" v-if="thisTabs === '待还车'">
+                  <van-button type="info" size="mini" @click="toReturnCar"
+                    >还车</van-button
+                  >
+                </div>
+                <div class="orderBtn" v-else>
                   <van-button type="info" size="mini" @click="toAssignCar"
                     >指派车辆/司机</van-button
                   >
@@ -70,18 +75,68 @@ export default {
     [PullRefresh.name]: PullRefresh,
     [Button.name]: Button,
   },
-  props: {},
+  props: {
+    thisTabs: {
+      type: String,
+      default: '全部订单',
+    },
+  },
   data() {
     return {
       list: [],
+      returnList: [],
       loading: false,
       finished: false,
       refreshing: false,
+      orderList: [
+        {
+          useStatus: '待取车',
+          orderType: '单位订单',
+          orderNumber: '161344262346',
+          orderTime: '2021-12-21 12:19:36',
+          carType: '雪佛兰新科鲁兹',
+          useCarTime: '2021-12-21至2021-12-21（2天）',
+          orderMoney: '￥178',
+          isDriver: '是',
+          contactName: '张三单位',
+          contactPhone: '18933552324',
+          address: '惠保县上村',
+        },
+        {
+          useStatus: '待取车',
+          orderType: '个人订单',
+          orderNumber: '161344262347',
+          orderTime: '2021-12-21 12:09:36',
+          carType: '雪佛兰新科鲁兹',
+          useCarTime: '2021-12-21至2021-12-21（2天）',
+          orderMoney: '￥178',
+          isDriver: '是',
+          contactName: '李四',
+          contactPhone: '18933552324',
+          address: '惠保县中村',
+        },
+        {
+          useStatus: '待还车',
+          orderType: '单位订单',
+          orderNumber: '161344262348',
+          orderTime: '2021-12-21 12:59:36',
+          carType: '雪佛兰新科鲁兹',
+          useCarTime: '2021-12-21至2021-12-21（2天）',
+          orderMoney: '￥178',
+          isDriver: '是',
+          contactName: '王五单位',
+          contactPhone: '18933552324',
+          address: '惠保县下村',
+        },
+      ],
     }
   },
   computed: {},
   watch: {},
-  created() {},
+  created() {
+    console.log(this.thisTabs)
+  },
+
   mounted() {},
   methods: {
     onLoad() {
@@ -89,17 +144,29 @@ export default {
       // setTimeout 仅做示例，真实场景中一般为 ajax 请求
       setTimeout(() => {
         if (this.refreshing) {
-          this.list = []
+          this.orderList = []
           this.refreshing = false
         }
 
-        for (let i = 0; i < 10; i++) {
-          this.list.push(this.list.length + 1)
+        // for (let i = 0; i < 10; i++) {
+        //   this.list.push(this.list.length + 1)
+        // }
+        // 筛选订单类型
+        if (this.thisTabs === '全部订单') {
+          this.list = this.orderList
+        } else if (this.thisTabs === '待还车') {
+          this.list = this.orderList.filter(item => {
+            return item.useStatus.indexOf(this.thisTabs) > -1
+          })
+        } else {
+          this.list = this.orderList.filter(item => {
+            return item.orderType.indexOf(this.thisTabs) > -1
+          })
         }
         // 加载状态结束
         this.loading = false
         // 数据全部加载完成
-        if (this.list.length >= 10) {
+        if (this.orderList.length) {
           this.finished = true
         }
       }, 1000)
@@ -115,6 +182,9 @@ export default {
     },
     toAssignCar() {
       this.$router.push('/assign')
+    },
+    toReturnCar() {
+      this.$router.push('/return')
     },
   },
 }

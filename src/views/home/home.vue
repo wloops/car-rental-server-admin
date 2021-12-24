@@ -62,18 +62,20 @@
         <div class="tabs">
           <van-tabs v-model="active" swipeable animated sticky>
             <van-tab title="全部订单">
-              <orders-list tabA-ative="0"></orders-list>
+              <orders-list this-tabs="全部订单"></orders-list>
             </van-tab>
             <van-tab title="单位订单">
-              <orders-list tabA-ative="1"></orders-list>
+              <orders-list this-tabs="单位订单"></orders-list>
             </van-tab>
             <van-tab title="个人订单">
-              <orders-list tabA-ative="2"></orders-list>
+              <orders-list this-tabs="个人订单"></orders-list>
+            </van-tab>
+            <van-tab title="待还车">
+              <orders-list this-tabs="待还车"></orders-list>
             </van-tab>
           </van-tabs>
         </div>
       </div>
-      <orders-list></orders-list>
     </div>
   </div>
 </template>
