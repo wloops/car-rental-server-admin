@@ -2,7 +2,10 @@
   <div class="assignCar">
     <div class="topNav">
       <van-nav-bar
-        left-text="指派车辆/司机"
+        fixed
+        placeholder
+        left-text="主页"
+        title="指派车辆/司机"
         left-arrow
         color="#000"
         @click-left="onClickLeft"
@@ -23,11 +26,12 @@
       <van-field
         readonly
         clickable
-        name="picker"
+        name="车牌号码"
         :value="form.carID"
         label="车牌号码"
         placeholder="点击选择车辆"
         @click="showCarID = true"
+        :rules="[{ required: true, message: '请选择车牌号码' }]"
       />
       <van-popup v-model="showCarID" position="bottom">
         <van-picker
@@ -55,11 +59,12 @@
           <van-field
             readonly
             clickable
-            name="picker"
+            name="姓名"
             :value="form.driverName"
             label="姓名"
             placeholder="点击选择司机"
             @click="showDriver = true"
+            :rules="[{ required: true, message: '请选择司机' }]"
           />
           <van-popup v-model="showDriver" position="bottom">
             <van-picker
@@ -89,14 +94,15 @@
           v-model="form.otherMessage"
           rows="3"
           autosize
+          name="备注"
           type="textarea"
           placeholder="填写其它相关信息"
         />
       </div>
 
-      <div class="submitBtn">
+      <div style="margin: 16px">
         <van-button round block type="info" native-type="submit"
-          >提交</van-button
+          >确定出车</van-button
         >
       </div>
     </van-form>
@@ -104,7 +110,7 @@
 </template>
 
 <script>
-import { NavBar, Form, Field, Button, Popup, Picker } from 'vant'
+import { NavBar, Form, Field, Button, Popup, Picker, Toast } from 'vant'
 export default {
   name: 'assignCar',
   components: {
@@ -114,6 +120,7 @@ export default {
     [Button.name]: Button,
     [Popup.name]: Popup,
     [Picker.name]: Picker,
+    [Toast.name]: Toast,
   },
   props: {},
   data() {
@@ -184,9 +191,7 @@ export default {
     onClickLeft() {
       this.$router.go(-1)
     },
-    onSubmit(values) {
-      console.log('submit', values)
-    },
+
     onConfirm(value) {
       this.form.carID = value
       if (value.indexOf('挂靠') > -1) {
@@ -203,7 +208,13 @@ export default {
     },
     onConfirmDriver(value) {
       this.form.driverName = value
+      this.form.driverPhone = this.carInfo[value.indexOf(value)].driverPhone
       this.showDriver = false
+    },
+    // 提交表单
+    onSubmit(values) {
+      console.log('submit', values)
+      Toast('出车成功')
     },
   },
 }
@@ -213,11 +224,5 @@ export default {
 h4 {
   color: #196ef7;
   margin: 1rem;
-}
-.submitBtn {
-  position: fixed;
-  bottom: 0.5rem;
-  width: 100%;
-  text-align: center;
 }
 </style>
