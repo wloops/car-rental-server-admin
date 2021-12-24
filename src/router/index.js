@@ -15,6 +15,11 @@ const routes = [
     component: () => import('@/views/assign/assignCar.vue'),
   },
   {
+    path: '/return',
+    name: 'return',
+    component: () => import('@/views/return/returnCar.vue'),
+  },
+  {
     path: '/',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
