@@ -27,12 +27,12 @@
                   <p>接车地址 : {{ item.address }}</p>
                 </div>
                 <div class="orderBtn returnCar" v-if="thisTabs === '待还车'">
-                  <van-button type="info" size="mini" @click="toReturnCar"
+                  <van-button type="info" size="small" @click="toReturnCar"
                     >还车</van-button
                   >
                 </div>
                 <div class="orderBtn" v-else>
-                  <van-button type="info" size="mini" @click="toAssignCar"
+                  <van-button type="info" size="small" @click="toAssignCar"
                     >指派车辆/司机</van-button
                   >
                 </div>
