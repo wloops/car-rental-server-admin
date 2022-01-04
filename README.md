@@ -22,4 +22,4 @@ yarn build
 
 See [Configuration Reference](https://cli.vuejs.org/config/).
 
-### test jenkins 自动部署-2
+### test jenkins 自动部署-3
