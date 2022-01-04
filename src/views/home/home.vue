@@ -126,7 +126,9 @@ export default {
   },
   computed: {},
   watch: {},
-  created() {},
+  created() {
+    console.log('test jenkins 自动部署')
+  },
   mounted() {},
   methods: {},
 }
