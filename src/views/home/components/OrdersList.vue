@@ -26,14 +26,17 @@
                   <p>电话 : {{ item.contactPhone }}</p>
                   <p>接车地址 : {{ item.address }}</p>
                 </div>
-                <div class="orderBtn returnCar" v-if="thisTabs === '待还车'">
-                  <van-button type="info" size="small" @click="toReturnCar"
-                    >还车</van-button
-                  >
-                </div>
-                <div class="orderBtn" v-else>
+                <div
+                  class="orderBtn"
+                  v-if="page === 'home' && item.useStatus === '待出车'"
+                >
                   <van-button type="info" size="small" @click="toAssignCar"
                     >指派车辆/司机</van-button
+                  >
+                </div>
+                <div class="orderBtn returnCar" v-else-if="page === 'home'">
+                  <van-button type="info" size="small" @click="toReturnCar"
+                    >还车/计算费用</van-button
                   >
                 </div>
               </div>
@@ -80,6 +83,9 @@ export default {
       type: String,
       default: '全部订单',
     },
+    page: {
+      type: String,
+    },
   },
   data() {
     return {
@@ -90,7 +96,7 @@ export default {
       refreshing: false,
       orderList: [
         {
-          useStatus: '待取车',
+          useStatus: '已出车',
           orderType: '单位订单',
           orderNumber: '161344262346',
           orderTime: '2021-12-21 12:19:36',
@@ -103,7 +109,7 @@ export default {
           address: '惠保县上村',
         },
         {
-          useStatus: '待取车',
+          useStatus: '已出车',
           orderType: '个人订单',
           orderNumber: '161344262347',
           orderTime: '2021-12-21 12:09:36',
@@ -116,7 +122,7 @@ export default {
           address: '惠保县中村',
         },
         {
-          useStatus: '待还车',
+          useStatus: '待出车',
           orderType: '单位订单',
           orderNumber: '161344262348',
           orderTime: '2021-12-21 12:59:36',
@@ -133,9 +139,7 @@ export default {
   },
   computed: {},
   watch: {},
-  created() {
-    console.log(this.thisTabs)
-  },
+  created() {},
 
   mounted() {},
   methods: {
@@ -154,13 +158,13 @@ export default {
         // 筛选订单类型
         if (this.thisTabs === '全部订单') {
           this.list = this.orderList
-        } else if (this.thisTabs === '待还车') {
+        } else if (this.thisTabs === '待出车') {
           this.list = this.orderList.filter(item => {
-            return item.useStatus.indexOf(this.thisTabs) > -1
+            return item.useStatus.indexOf('待出车') > -1
           })
         } else {
           this.list = this.orderList.filter(item => {
-            return item.orderType.indexOf(this.thisTabs) > -1
+            return item.orderType.indexOf('已出车') > -1
           })
         }
         // 加载状态结束

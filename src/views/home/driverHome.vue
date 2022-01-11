@@ -1,8 +1,8 @@
 <template>
   <div class="home">
     <div class="homeTop">
-      <div class="homeTitle">租车商家管理平台</div>
-      <div class="adminName">租车管理员：{{ adminName }}</div>
+      <div class="homeTitle">惠租车司机管理平台</div>
+      <div class="adminName">司机：{{ adminName }}</div>
       <div class="totalRevenue">
         <van-cell-group inset>
           <van-row gutter="20" type="flex" justify="space-between">
@@ -65,7 +65,7 @@
         <div class="tabs">
           <van-tabs v-model="active" swipeable animated sticky>
             <van-tab title="全部订单">
-              <orders-list this-tabs="全部订单" page="home"></orders-list>
+              <orders-list this-tabs="全部订单" page="driverHome"></orders-list>
             </van-tab>
             <!-- <van-tab title="单位订单">
               <orders-list this-tabs="单位订单"></orders-list>
@@ -77,7 +77,7 @@
               <orders-list this-tabs="待还车"></orders-list>
             </van-tab> -->
             <van-tab title="待出车">
-              <orders-list this-tabs="待出车" page="home"></orders-list>
+              <orders-list this-tabs="待出车" page="driverHome"></orders-list>
             </van-tab>
           </van-tabs>
         </div>
