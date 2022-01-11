@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <h4>租车商家管理平台</h4>
+    <h3>租车商家管理平台</h3>
     <div class="totalRevenue">
       <van-cell-group inset>
         <van-row gutter="20" type="flex" justify="space-between">
@@ -23,7 +23,7 @@
         </van-row>
       </van-cell-group>
     </div>
-    <div class="revenueDetailed">
+    <!-- <div class="revenueDetailed">
       <van-cell-group inset>
         <van-row type="flex" justify="space-between">
           <van-col span="10">
@@ -55,7 +55,7 @@
           </van-col>
         </van-row>
       </van-cell-group>
-    </div>
+    </div> -->
     <div class="myOrders">
       <h4>我的订单</h4>
       <div class="orders">
@@ -140,7 +140,7 @@ export default {
   // padding: 20px;
   background-color: #f7f7f7;
 }
-h4 {
+h3 {
   color: #196ef7;
   margin: 1rem;
 }
