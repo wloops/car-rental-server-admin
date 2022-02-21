@@ -1,8 +1,9 @@
 <template>
   <div class="home">
     <div class="homeTop">
-      <div class="homeTitle">租车商家管理平台</div>
-      <div class="adminName">租车管理员：{{ adminName }}</div>
+      <div class="homeTitle">{{ homeTitle }}</div>
+      <div class="adminName">{{ adminNameTitle }}：{{ adminName }}</div>
+      <!-- <van-button type="primary" @click="goLogin">登录</van-button> -->
       <div class="totalRevenue">
         <van-cell-group inset>
           <van-row gutter="20" type="flex" justify="space-between">
@@ -10,7 +11,7 @@
               <van-cell>
                 <template #title>
                   <div class="titleText">本月收入（元）</div>
-                  <span class="costText">1412.00</span>
+                  <span class="costText">{{ income.month }}</span>
                 </template>
               </van-cell>
             </van-col>
@@ -18,7 +19,7 @@
               <van-cell>
                 <template #title>
                   <div class="titleText">当日收入（元）</div>
-                  <span class="costText">1412.00</span>
+                  <span class="costText">{{ income.today }}</span>
                 </template>
               </van-cell>
             </van-col>
@@ -88,54 +89,63 @@
 
 <script>
 import OrdersList from './components/OrdersList.vue'
-import {
-  Cell,
-  CellGroup,
-  Button,
-  Toast,
-  Col,
-  Row,
-  NavBar,
-  Tab,
-  Tabs,
-  List,
-  Grid,
-  GridItem,
-  Tag,
-  PullRefresh,
-} from 'vant'
+import { getIncome } from '@/api/order'
+
 export default {
   name: 'home',
   components: {
     OrdersList,
-
-    [Cell.name]: Cell,
-    [CellGroup.name]: CellGroup,
-    [Button.name]: Button,
-    [Toast.name]: Toast,
-    [Col.name]: Col,
-    [Row.name]: Row,
-    [NavBar.name]: NavBar,
-    [Tab.name]: Tab,
-    [Tabs.name]: Tabs,
-    [List.name]: List,
-    [Grid.name]: Grid,
-    [GridItem.name]: GridItem,
-    [Tag.name]: Tag,
-    [PullRefresh.name]: PullRefresh,
   },
   props: {},
   data() {
     return {
       active: 0,
       adminName: '张三',
+      income: {
+        // total: 0,
+        today: '0', // 当日收入
+        month: '0', // 本月收入
+      },
+      userRole: '', // 用户角色
+      homeTitle: '', // 首页标题
+      adminNameTitle: '', // 管理员标题
     }
   },
   computed: {},
-  watch: {},
-  created() {},
+  watch: {
+    userRole: {
+      handler(newVal, oldVal) {
+        if (newVal.indexOf('司机') > -1) {
+          this.homeTitle = '惠租车司机管理平台'
+          this.adminNameTitle = '司机'
+        } else {
+          this.homeTitle = '租车商家管理平台'
+          this.adminNameTitle = '租车管理员'
+        }
+      },
+      immediate: true,
+    },
+  },
+  created() {
+    this.login()
+    this.userRole = window.localStorage.getItem('userRole')
+    this.adminName = window.localStorage.getItem('nickName')
+    getIncome().then(res => {
+      console.log(res)
+      if (res.data.rs === '1') {
+        let income = res.data.queryIncomeOfMonthAndDay[0]
+        this.income.month = income.orderTotalPriceByMonth
+        this.income.today = income.orderTotalPriceByDay
+        console.log('this.income', this.income)
+      }
+    })
+  },
   mounted() {},
-  methods: {},
+  methods: {
+    // goLogin() {
+    //   this.$router.push('/login')
+    // },
+  },
 }
 </script>
 

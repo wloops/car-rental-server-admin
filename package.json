@@ -9,7 +9,10 @@
     "dev": "vue-cli-service build && rm -rf ~/tomcat7/webapps/carRentalAdmin/* && cp -rf ./dist/* ~/tomcat7/webapps/carRentalAdmin/ && echo '--部署完成-- [http://paytunnel.cn/carRentalAdmin]'"
   },
   "dependencies": {
+    "axios": "^0.26.0",
     "core-js": "^3.6.5",
+    "jsencrypt": "^3.2.1",
+    "json-bigint": "^1.0.0",
     "vant": "^2.12.37",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
