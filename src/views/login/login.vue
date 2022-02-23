@@ -463,7 +463,7 @@ export default {
 
             // window.location.href = global_.clientUrl
           } else {
-            Dialog.alert({
+            that.$dialog.alert({
               message: result,
             }).then(() => {
               return false

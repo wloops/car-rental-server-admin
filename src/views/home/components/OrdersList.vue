@@ -181,7 +181,7 @@ export default {
         numOfPerPage: this.pageSize,
       }).then(res => {
         if (res.data.rs === '1') {
-          console.log('res.data', res.data)
+          console.log('管理员全部订单', res.data)
           this.orderList = this.orderList.concat(res.data.queryCarMercAllOrders)
           this.totalNum = res.data.queryCarMercAllOrders_totalRecNum
           this.list = this.orderList
@@ -200,7 +200,7 @@ export default {
         numOfPerPage: this.pageSize,
       }).then(res => {
         if (res.data.rs === '1') {
-          console.log('res.data', res.data)
+          console.log('司机全部订单', res.data)
           this.orderList = this.orderList.concat(res.data.queryDriverAllOrders)
           this.totalNum = res.data.queryDriverAllOrders_totalRecNum
           this.list = this.orderList
@@ -219,7 +219,7 @@ export default {
         numOfPerPage: this.pageSize,
       }).then(res => {
         if (res.data.rs === '1') {
-          console.log('res.data', res.data)
+          console.log('管理员未出行订单', res.data)
           this.orderList = this.orderList.concat(
             res.data.queryCarMercNotTrainOrders
           )
@@ -235,13 +235,13 @@ export default {
         }
       })
     },
-    loadWaitOrderOfDriver(){
+    loadWaitOrderOfDriver() {
       getWaitOrderOfDriver({
         currentPage: this.pageNum,
         numOfPerPage: this.pageSize,
       }).then(res => {
         if (res.data.rs === '1') {
-          console.log('res.data', res.data)
+          console.log('司机未出行订单', res.data)
           this.orderList = this.orderList.concat(
             res.data.queryDriverNotTrainOrders
           )
@@ -256,7 +256,7 @@ export default {
           // this.$toast(res.data.rs)
         }
       })
-    }
+    },
   },
 }
 </script>
