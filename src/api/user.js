@@ -15,11 +15,27 @@ export const silenceLogin = params => {
     params,
   })
 }
+// 检查登录状态
+export const checkLogin = () => {
+  return request({
+    method: 'GET',
+    url: '/app/checkLogin',
+  })
+}
 
 // 退出登录
 export const setLogout = () => {
   return request({
     method: 'GET',
     url: '/app/appLogout',
+  })
+}
+
+//账号方式登录
+export const accountLogin = data => {
+  return request({
+    method: 'POST',
+    url: '/app/accountLogin',
+    data,
   })
 }

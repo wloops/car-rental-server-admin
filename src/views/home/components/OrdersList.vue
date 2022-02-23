@@ -40,16 +40,25 @@
                     接车地址 : {{ item.deliveryAddr }}
                   </div>
                 </div>
-                <div
-                  class="orderBtn"
-                  v-if="page === 'home' && item.deliveryStatus === '0'"
-                >
-                  <van-button type="info" size="small" @click="toAssignCar"
-                    >指派车辆/司机</van-button
+                <div class="orderBtn" v-if="item.orderStatusShow === '未提车'">
+                  <van-button
+                    type="info"
+                    size="small"
+                    @click="toAssignDriver(item)"
+                    >指派司机</van-button
+                  >
+                  <van-button
+                    type="info"
+                    size="small"
+                    @click="toAssignCar(item)"
+                    >指派车辆</van-button
                   >
                 </div>
-                <div class="orderBtn returnCar" v-else-if="page === 'home'">
-                  <van-button type="info" size="small" @click="toReturnCar"
+                <div class="orderBtn returnCar" v-else>
+                  <van-button
+                    type="info"
+                    size="small"
+                    @click="toReturnCar(item)"
                     >还车/计算费用</van-button
                   >
                 </div>
@@ -64,44 +73,20 @@
 </template>
 
 <script>
-// import {
-//   NavBar,
-//   Tab,
-//   Tabs,
-//   Cell,
-//   CellGroup,
-//   List,
-//   Grid,
-//   GridItem,
-//   Tag,
-//   PullRefresh,
-//   Button,
-// } from 'vant'
-
-import { getAllOrder, getWaitOrder } from '@/api/order'
+import {
+  getAllOrder,
+  getWaitOrder,
+  getAllOrderOfDriver,
+  getWaitOrderOfDriver,
+} from '@/api/order'
 
 export default {
   name: 'OrdersList',
-  components: {
-    // [NavBar.name]: NavBar,
-    // [Tab.name]: Tab,
-    // [Tabs.name]: Tabs,
-    // [Cell.name]: Cell,
-    // [CellGroup.name]: CellGroup,
-    // [List.name]: List,
-    // [Grid.name]: Grid,
-    // [GridItem.name]: GridItem,
-    // [Tag.name]: Tag,
-    // [PullRefresh.name]: PullRefresh,
-    // [Button.name]: Button,
-  },
+  components: {},
   props: {
     thisTabs: {
       type: String,
       default: '全部订单',
-    },
-    page: {
-      type: String,
     },
   },
   data() {
@@ -117,7 +102,10 @@ export default {
       totalNum: 0,
     }
   },
-  computed: {},
+  computed: {
+    // 是否指派司机
+    isAssignDriver() {},
+  },
   watch: {},
   created() {
     // this.onLoad()
@@ -134,39 +122,26 @@ export default {
           this.orderList = []
           this.refreshing = false
         }
-
         // for (let i = 0; i < 10; i++) {
         //   this.list.push(this.list.length + 1)
         // }
         // 筛选订单类型
+        let userRole = window.localStorage.getItem('userRole')
+
         if (this.thisTabs === '全部订单') {
           this.pageNum++
-          getAllOrder({
-            currentPage: this.pageNum,
-            numOfPerPage: this.pageSize,
-          }).then(res => {
-            if (res.data.rs === '1') {
-              console.log('res.data', res.data)
-              this.orderList = this.orderList.concat(
-                res.data.queryCarMercAllOrders
-              )
-              this.totalNum = res.data.queryCarMercAllOrders_totalRecNum
-              this.list = this.orderList
-              console.log('this.list', this.list)
-              this.loading = false
-              this.finished =
-                this.orderList.length >=
-                res.data.queryCarMercAllOrders_totalRecNum
-            }
-          })
+          if (userRole.indexOf('司机') > -1) {
+            this.loadAllOrderOfDriver()
+          } else {
+            this.loadAllOrder()
+          }
         } else if (this.thisTabs === '待出车') {
-          this.list = this.orderList.filter(item => {
-            return item.useStatus.indexOf('待出车') > -1
-          })
-        } else {
-          this.list = this.orderList.filter(item => {
-            return item.orderType.indexOf('已出车') > -1
-          })
+          this.pageNum++
+          if (userRole.indexOf('司机') > -1) {
+            this.loadWaitOrderOfDriver()
+          } else {
+            this.loadWaitOrder()
+          }
         }
         // // 加载状态结束
         // this.loading = false
@@ -186,12 +161,102 @@ export default {
       this.loading = true
       this.onLoad()
     },
-    toAssignCar() {
+    toAssignCar(item) {
+      this.$store.commit('order/setIsAssignDriver', true)
+      this.$store.commit('order/setCurrentOrder', item)
       this.$router.push('/assign')
     },
-    toReturnCar() {
+    toAssignDriver(item) {
+      console.log('toAssignDriver', item)
+      this.$store.commit('order/setIsAssignDriver', false)
+      this.$router.push('/assign')
+    },
+    toReturnCar(item) {
+      console.log('toReturnCar', item)
       this.$router.push('/return')
     },
+    loadAllOrder() {
+      getAllOrder({
+        currentPage: this.pageNum,
+        numOfPerPage: this.pageSize,
+      }).then(res => {
+        if (res.data.rs === '1') {
+          console.log('res.data', res.data)
+          this.orderList = this.orderList.concat(res.data.queryCarMercAllOrders)
+          this.totalNum = res.data.queryCarMercAllOrders_totalRecNum
+          this.list = this.orderList
+          console.log('this.list', this.list)
+          this.loading = false
+          this.finished =
+            this.orderList.length >= res.data.queryCarMercAllOrders_totalRecNum
+        } else {
+          // this.$toast(res.data.rs)
+        }
+      })
+    },
+    loadAllOrderOfDriver() {
+      getAllOrderOfDriver({
+        currentPage: this.pageNum,
+        numOfPerPage: this.pageSize,
+      }).then(res => {
+        if (res.data.rs === '1') {
+          console.log('res.data', res.data)
+          this.orderList = this.orderList.concat(res.data.queryDriverAllOrders)
+          this.totalNum = res.data.queryDriverAllOrders_totalRecNum
+          this.list = this.orderList
+          console.log('this.list', this.list)
+          this.loading = false
+          this.finished =
+            this.orderList.length >= res.data.queryDriverAllOrders_totalRecNum
+        } else {
+          // this.$toast(res.data.rs)
+        }
+      })
+    },
+    loadWaitOrder() {
+      getWaitOrder({
+        currentPage: this.pageNum,
+        numOfPerPage: this.pageSize,
+      }).then(res => {
+        if (res.data.rs === '1') {
+          console.log('res.data', res.data)
+          this.orderList = this.orderList.concat(
+            res.data.queryCarMercNotTrainOrders
+          )
+          this.totalNum = res.data.queryCarMercNotTrainOrders_totalRecNum
+          this.list = this.orderList
+          console.log('this.list', this.list)
+          this.loading = false
+          this.finished =
+            this.orderList.length >=
+            res.data.queryCarMercNotTrainOrders_totalRecNum
+        } else {
+          // this.$toast(res.data.rs)
+        }
+      })
+    },
+    loadWaitOrderOfDriver(){
+      getWaitOrderOfDriver({
+        currentPage: this.pageNum,
+        numOfPerPage: this.pageSize,
+      }).then(res => {
+        if (res.data.rs === '1') {
+          console.log('res.data', res.data)
+          this.orderList = this.orderList.concat(
+            res.data.queryDriverNotTrainOrders
+          )
+          this.totalNum = res.data.queryDriverNotTrainOrders_totalRecNum
+          this.list = this.orderList
+          console.log('this.list', this.list)
+          this.loading = false
+          this.finished =
+            this.orderList.length >=
+            res.data.queryDriverNotTrainOrders_totalRecNum
+        } else {
+          // this.$toast(res.data.rs)
+        }
+      })
+    }
   },
 }
 </script>
@@ -232,5 +297,8 @@ export default {
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  .van-button {
+    margin-left: 0.5rem;
+  }
 }
 </style>

@@ -62,7 +62,7 @@
 </template>
 
 <script>
-import { setLogout } from '@/api/user'
+// import { setLogout } from '@/api/user'
 export default {
   name: 'myPage',
   components: {},
@@ -90,12 +90,12 @@ export default {
   },
   methods: {
     init() {
-      let user = window.localStorage.getItem('memberID')
+      let user = window.localStorage.getItem('adminMemberID')
       let guest = window.localStorage.getItem('guestMemberID')
       if (user) {
         this.userInfo.id = user
         this.isLogin = true
-        this.userInfo.nickName = window.localStorage.getItem('nickName')
+        this.userInfo.nickName = window.localStorage.getItem('adminNickName')
       } else {
         this.userInfo.id = guest
         this.isLogin = false
@@ -110,11 +110,11 @@ export default {
           })
           .then(() => {
             // on confirm
-            const toast = this.$toast.loading({
-              duration: 0, // 持续展示 toast
-              forbidClick: true,
-              message: '正在退出...',
-            })
+            // const toast = this.$toast.loading({
+            //   duration: 0, // 持续展示 toast
+            //   forbidClick: true,
+            //   message: '正在退出...',
+            // })
 
             this.userInfo.id = ''
             this.userInfo.nickName = ''
@@ -123,34 +123,37 @@ export default {
             // this.$store.commit('setUnitToken', '')
             // window.localStorage.removeItem('unitToken')
             // window.localStorage.removeItem('personalToken')
-            window.localStorage.removeItem('memberID')
-            window.localStorage.removeItem('nickName')
+            window.localStorage.removeItem('adminMemberID')
+            window.localStorage.removeItem('adminNickName')
+            window.localStorage.removeItem('userRole')
+            window.localStorage.removeItem('userAdmin')
 
             this.userInfo.id = window.localStorage.getItem('guestMemberID')
-            setLogout().then(res => {
-              if (res.data.rs === '1') {
-                // this.isLogin = false
-                this.init()
-                let second = 1
-                const timer = setInterval(() => {
-                  second--
-                  if (second) {
-                    toast.message = `退出中...`
-                  } else {
-                    clearInterval(timer)
-                    toast.message = '退出成功'
-                    toast.icon = 'success'
-                    // 手动清除 Toast
-                    this.$toast.clear()
-                  }
-                }, 1000)
-                // this.$toast.success('退出成功')
-              }
-            })
+            // setLogout().then(res => {
+            // if (res.data.rs === '1') {
+            // this.isLogin = false
+            this.init()
+            // let second = 0
+            // const timer = setInterval(() => {
+            //   second--
+            //   if (second) {
+            //     toast.message = `退出中...`
+            //   } else {
+            //     clearInterval(timer)
+            //     toast.message = '退出成功'
+            //     toast.icon = 'success'
+            //     // 手动清除 Toast
+            //     this.$toast.clear()
+            //   }
+            // }, 1000)
+            this.$toast.success('退出成功')
+            this.$router.push('/login')
+            // }
+            // })
           })
-          .catch(() => {
-            // on cancel
-          })
+        // .catch(() => {
+        //   // on cancel
+        // })
       } else {
         this.$router.push('/login')
       }

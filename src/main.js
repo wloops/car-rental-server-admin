@@ -10,7 +10,8 @@ import { globalRegister } from './global'
 /* 引入config文件模块 */
 import global_ from '@/global/config_global'
 // import { BASE_URL } from '@/global/config'
-import { checkLogin } from '@/api/user'
+import { silenceLogin, checkLogin } from '@/api/user'
+import { Dialog } from 'vant'
 
 Vue.use(globalRegister)
 
@@ -108,13 +109,21 @@ Vue.prototype.checklogin = function (callback) {
     var userName = response.data.memberID
     let storage = window.localStorage
     if (userName === 'null') {
-      storage.removeItem('memberID')
-      storage.removeItem('nickName')
+      storage.removeItem('adminMemberID')
+      storage.removeItem('adminNickName')
+      storage.removeItem('userAdmin')
       console.log(
         '登录过期',
-        'memberID',
-        window.localStorage.getItem('memberID')
+        'adminMemberID',
+        window.localStorage.getItem('adminMemberID')
       )
+      Dialog.alert({
+        title: '提示',
+        message: '登录过期,请重新登录',
+      }).then(() => {
+        // on close
+        this.$router.push('/login')
+      })
     }
   })
 }
@@ -200,7 +209,10 @@ Vue.prototype.login = function (callback) {
   }
 
   // var REALTERMTYPE = ''
+  let code = ''
   let appid = ''
+  let REALTERMTYPE = ''
+  let REALUSERNAME = ''
   let appid_REALTERMTYPE_REALUSERNAME = ''
   let url = '/currencyLogin/login'
   console.log('param::' + param)
@@ -211,8 +223,10 @@ Vue.prototype.login = function (callback) {
     )
 
     appid = appid_REALTERMTYPE_REALUSERNAME.split('&')[0]
+    REALTERMTYPE = appid_REALTERMTYPE_REALUSERNAME.split('&')[1]
+    REALUSERNAME = appid_REALTERMTYPE_REALUSERNAME.split('&')[2]
     storage.setItem('appid', appid)
-    let code = param.substring(
+    code = param.substring(
       param.indexOf('code') + 5,
       param.indexOf('state') - 1
     )
@@ -231,47 +245,90 @@ Vue.prototype.login = function (callback) {
   }
   var that = this
   console.log('url:::' + url)
-  this.$http
-    .get(`http://www.paytunnel.cn/carRentalServerRH${url}`)
-    .then(function (response) {
-      console.log('response.status:::', response)
-      console.log('response.data:::', response.data)
-      var rs = JSON.stringify(response.data)
-      if (rs.indexOf('-11419') != -1) {
-        // 则是没有注册
-        that.regSchool('广西德保县惠保投资发展有限公司')
-      } else {
-        var userName = response.data.userName
-        global_.token = response.data.token.token
-        global_.userName = userName
-        global_.openid = response.data.openid
-        global_.TELLERCOMPANY = response.data.TELLERCOMPANY
-        appid = response.data.appid
-        /* --当刷新页面导致token不存在时,使用sessionStorage中的token-- */
-        storage.setItem('token', global_.token)
-        storage.setItem('openid', global_.openid)
-        // storage.setItem('memberID', global_.userName)
-        storage.setItem('appid', appid)
-        storage.setItem('TELLERCOMPANY', response.data.TELLERCOMPANY)
 
-        storage.setItem('guestMemberID', response.data.userName)
+  silenceLogin({
+    code: code,
+    appid: appid,
+    REALTERMTYPE: REALTERMTYPE,
+    REALUSERNAME: REALUSERNAME,
+  }).then(function (response) {
+    //请求成功
+    console.log('silenceLogin response:', response.data)
+    // console.log('response.status:::', response)
+    //   // console.log('response.data:::', response.data)
+    var rs = JSON.stringify(response.data)
+    if (rs.indexOf('-11419') != -1) {
+      // 则是没有注册
+      that.regSchool('广西德保县惠保投资发展有限公司')
+    } else {
+      var userName = response.data.userName
+      global_.token = response.data.token.token
+      global_.userName = userName
+      global_.openid = response.data.openid
+      global_.TELLERCOMPANY = response.data.TELLERCOMPANY
+      appid = response.data.appid
+      /* --当刷新页面导致token不存在时,使用sessionStorage中的token-- */
+      storage.setItem('token', global_.token)
+      storage.setItem('openid', global_.openid)
+      // storage.setItem('memberID', global_.userName)
+      storage.setItem('appid', appid)
+      storage.setItem('TELLERCOMPANY', response.data.TELLERCOMPANY)
 
-        that.schoolName = storage.getItem('TELLERCOMPANY')
+      storage.setItem('guestMemberID', response.data.userName)
+      that.checklogin()
 
-        that.checklogin()
-        // that.dataLoading = false
+      that.schoolName = storage.getItem('TELLERCOMPANY')
 
-        // that.getShopList()
-        // that.getBannerImages()
-        // that.getNotice()
-        // that.wxConfig()
-        // callback(true)
-      }
-    })
-    .catch(function (error) {
-      console.log(error)
-      // callback(false)
-    })
+      // that.dataLoading = false
+
+      // that.getShopList()
+      // that.getBannerImages()
+      // that.getNotice()
+      // that.wxConfig()
+      // callback(true)
+    }
+  })
+  // this.$http
+  //   .get(`http://www.paytunnel.cn/carRentalServerRH${url}`)
+  //   .then(function (response) {
+  //     console.log('response.status:::', response)
+  //     console.log('response.data:::', response.data)
+  //     var rs = JSON.stringify(response.data)
+  //     if (rs.indexOf('-11419') != -1) {
+  //       // 则是没有注册
+  //       that.regSchool('广西德保县惠保投资发展有限公司')
+  //     } else {
+  //       var userName = response.data.userName
+  //       global_.token = response.data.token.token
+  //       global_.userName = userName
+  //       global_.openid = response.data.openid
+  //       global_.TELLERCOMPANY = response.data.TELLERCOMPANY
+  //       appid = response.data.appid
+  //       /* --当刷新页面导致token不存在时,使用sessionStorage中的token-- */
+  //       storage.setItem('token', global_.token)
+  //       storage.setItem('openid', global_.openid)
+  //       // storage.setItem('memberID', global_.userName)
+  //       storage.setItem('appid', appid)
+  //       storage.setItem('TELLERCOMPANY', response.data.TELLERCOMPANY)
+
+  //       storage.setItem('guestMemberID', response.data.userName)
+
+  //       that.schoolName = storage.getItem('TELLERCOMPANY')
+
+  //       that.checklogin()
+  //       // that.dataLoading = false
+
+  //       // that.getShopList()
+  //       // that.getBannerImages()
+  //       // that.getNotice()
+  //       // that.wxConfig()
+  //       // callback(true)
+  //     }
+  //   })
+  //   .catch(function (error) {
+  //     console.log(error)
+  //     // callback(false)
+  //   })
 }
 
 new Vue({

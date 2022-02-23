@@ -68,15 +68,6 @@
             <van-tab title="全部订单">
               <orders-list this-tabs="全部订单" page="home"></orders-list>
             </van-tab>
-            <!-- <van-tab title="单位订单">
-              <orders-list this-tabs="单位订单"></orders-list>
-            </van-tab>
-            <van-tab title="个人订单">
-              <orders-list this-tabs="个人订单"></orders-list>
-            </van-tab> -->
-            <!-- <van-tab title="待还车">
-              <orders-list this-tabs="待还车"></orders-list>
-            </van-tab> -->
             <van-tab title="待出车">
               <orders-list this-tabs="待出车" page="home"></orders-list>
             </van-tab>
@@ -89,7 +80,7 @@
 
 <script>
 import OrdersList from './components/OrdersList.vue'
-import { getIncome } from '@/api/order'
+import { getIncome, getIncomeOfDriver } from '@/api/order'
 
 export default {
   name: 'home',
@@ -115,6 +106,7 @@ export default {
   watch: {
     userRole: {
       handler(newVal, oldVal) {
+        console.log('userRole', newVal)
         if (newVal.indexOf('司机') > -1) {
           this.homeTitle = '惠租车司机管理平台'
           this.adminNameTitle = '司机'
@@ -123,28 +115,49 @@ export default {
           this.adminNameTitle = '租车管理员'
         }
       },
-      immediate: true,
+      immediate: true, // 初始化时立即触发
     },
   },
   created() {
-    this.login()
+    // this.login()
     this.userRole = window.localStorage.getItem('userRole')
-    this.adminName = window.localStorage.getItem('nickName')
-    getIncome().then(res => {
-      console.log(res)
-      if (res.data.rs === '1') {
-        let income = res.data.queryIncomeOfMonthAndDay[0]
-        this.income.month = income.orderTotalPriceByMonth
-        this.income.today = income.orderTotalPriceByDay
-        console.log('this.income', this.income)
-      }
-    })
+    this.adminName = window.localStorage.getItem('adminNickName')
+    if (this.userRole.indexOf('司机') > -1) {
+      this.loadIncomeOfDriver()
+    } else {
+      this.loadIncome()
+    }
   },
-  mounted() {},
+  mounted() {
+    console.log('userRole', window.localStorage.getItem('userRole'))
+  },
   methods: {
-    // goLogin() {
-    //   this.$router.push('/login')
-    // },
+    loadIncome() {
+      getIncome().then(res => {
+        console.log('income:', res.data)
+        if (res.data.rs === '1') {
+          let income = res.data.queryIncomeOfMonthAndDay[0]
+          this.income.month = income.orderTotalPriceByMonth
+          this.income.today = income.orderTotalPriceByDay
+          console.log('this.income', this.income)
+        } else {
+          // this.$toast(res.data.rs)
+        }
+      })
+    },
+    loadIncomeOfDriver() {
+      getIncomeOfDriver().then(res => {
+        console.log('IncomeOfDriver:', res.data)
+        if (res.data.rs === '1') {
+          let income = res.data.queryIncomeOfDriver[0]
+          this.income.month = income.orderTotalPriceByMonth
+          this.income.today = income.orderTotalPriceByDay
+          console.log('this.income', this.income)
+        } else {
+          // this.$toast(res.data.rs)
+        }
+      })
+    },
   },
 }
 </script>

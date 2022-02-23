@@ -12,7 +12,7 @@ const routes = [
   {
     path: '/assign',
     name: 'assign',
-    component: () => import('@/views/assign/assignCar.vue'),
+    component: () => import('@/views/assign/assign.vue'),
   },
   {
     path: '/return',
@@ -66,30 +66,32 @@ const router = new VueRouter({
 // from: 来自哪里的路由信息
 // next: 放行方法(符合通过条件可调用放行)
 router.beforeEach((to, from, next) => {
-  console.log('to:', to)
+  // console.log('to:', to)
   // 用户登录状态信息
-  let user = window.localStorage.getItem('memberID')
-  console.log('user:', user)
-  // 单位登录状态信息
-  // let unitUser = store.getters.getUnitToken
-  // let userID = window.localStorage.getItem('memberID')
-  // console.log('unitToken', unitUser)
-  //   // 验证下单页面的登录状态
-  if (to.path == '/') {
-    if (user) {
+  const user = JSON.parse(window.localStorage.getItem('userAdmin'))
+  let userID = window.localStorage.getItem('adminMemberID')
+  // console.log('user:', user)
+  // 验证登录页面的登录状态
+  if (to.path !== '/login') {
+    if (user && userID) {
+      // 已登录,允许通过
       next()
     } else {
       // 没有登录信息,跳转到登陆页面
-      // Toast.loading({
-      //   message: '请先登录,正在跳转到登录页面...',
-      //   forbidClick: true,
-      //   duration: 1000,
-      // })
-
       next('/login')
     }
+  } else {
+    // 如果是登录页面 就允许通过
+    next()
   }
+  // if (to.path == '/') {
+  //   if (user && userID) {
+  //     next()
+  //   } else {
+  //     next('/login')
+  //   }
+  // }
 
-  next()
+  // next()
 })
 export default router

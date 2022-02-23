@@ -6,7 +6,6 @@
         <van-nav-bar
           title=""
           left-arrow
-          @click-left="backPage"
           @click-right="changLoginType"
         >
           <template #right>
@@ -106,7 +105,12 @@
 
           <p class="unPassword" v-if="loginType === true"><a>忘记密码？</a></p>
           <div class="loginBtn" style="margin: 1rem" v-if="loginType === true">
-            <van-button type="info" color="#ffc65f" @click="toRegister">
+            <van-button
+              type="info"
+              color="#ffc65f"
+              native-type="button"
+              @click="toRegister"
+            >
               注册</van-button
             >
             <van-button type="info" color="#ffc65f" native-type="submit"
@@ -300,13 +304,14 @@ export default {
             global_.TELLERROLE = response.data.TELLERROLE
             global_.token = response.data.token.token
             /* --当刷新页面导致token不存在时,使用sessionStorage中的token--*/
-            storage.setItem('token', global_.token)
-            storage.setItem('memberID', global_.userName)
-            storage.setItem('TELLERROLE', response.data.TELLERROLE)
-            storage.setItem('nickName', nickName)
-            storage.setItem('TELLERCOMPANY1', response.data.TELLERCOMPANY)
+            // storage.setItem('token', global_.token)
+            // storage.setItem('memberID', global_.userName)
+            // storage.setItem('TELLERROLE', response.data.TELLERROLE)
+            storage.setItem('userAdmin', JSON.stringify(response.data))
+            storage.setItem('adminNickName', nickName)
+            // storage.setItem('TELLERCOMPANY1', response.data.TELLERCOMPANY)
 
-            storage.setItem('memberID', response.data.memberID)
+            storage.setItem('adminMemberID', response.data.memberID)
             // 用户权限
             storage.setItem('userRole', response.data.TELLERROLE)
             // window.location.href = global_.clientUrl
@@ -327,9 +332,9 @@ export default {
           console.log('error:' + error)
         })
     },
-    backPage() {
-      this.$router.back()
-    },
+    // backPage() {
+    //   this.$router.back()
+    // },
     toRegister() {
       // this.$router.push('/register')
       // this.$router.push({
@@ -403,7 +408,7 @@ export default {
           //请求成功
           var result = response.data.rs
           console.log(result)
-          console.log('response.data', response.data)
+          console.log('login response', response)
           if (result == '1') {
             console.log('账号登录成功', response.data)
             let storage = window.localStorage
@@ -412,20 +417,25 @@ export default {
             var nickName = response.data.TELLERNAME
             global_.userName = userName
             global_.nickName = nickName
-            global_.usernameLERCOMPANY = response.data.usernameLERCOMPANY
-            global_.usernameLERROLE = response.data.usernameLERROLE
+            // global_.usernameLERCOMPANY = response.data.usernameLERCOMPANY
+            // global_.usernameLERROLE = response.data.usernameLERROLE
             global_.token = response.data.token.token
 
             /* --当刷新页面导致token不存在时,使用sessionStorage中的token--*/
-            storage.setItem('unitToken', global_.token)
-            storage.setItem('memberID', global_.userName)
-            storage.setItem('usernameLERROLE', response.data.usernameLERROLE)
-            storage.setItem(
-              'usernameLERCOMPANY1',
-              response.data.usernameLERCOMPANY
-            )
-            storage.setItem('nickName', nickName)
-            storage.setItem('memberID', userName)
+            // storage.setItem('unitToken', global_.token)
+            // storage.setItem('memberID', global_.userName)
+            // storage.setItem('usernameLERROLE', response.data.usernameLERROLE)
+            // storage.setItem(
+            //   'usernameLERCOMPANY1',
+            //   response.data.usernameLERCOMPANY
+            // )
+            // storage.setItem('nickName', nickName)
+            storage.setItem('userAdmin', JSON.stringify(response.data))
+
+            storage.setItem('adminMemberID', userName)
+            storage.setItem('adminNickName', nickName)
+            // 用户权限
+            storage.setItem('userRole', response.data.TELLERROLE)
             // 单位token 存储到vuex(localStorage)
             // that.$store.commit('setUnitToken', response.data.token.token)
 

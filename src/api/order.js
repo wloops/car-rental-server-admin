@@ -33,3 +33,29 @@ export const getWaitOrder = params => {
     params,
   })
 }
+// 查询司机本月和当日收入
+export const getIncomeOfDriver = params => {
+  return request({
+    method: 'GET',
+    url: '/search/queryIncomeOfDriver',
+    params,
+  })
+}
+
+// 获取司机全部订单
+export const getAllOrderOfDriver = params => {
+  return request({
+    method: 'GET',
+    url: '/search/queryDriverAllOrders',
+    params,
+  })
+}
+
+// 获取司机待出车订单
+export const getWaitOrderOfDriver = params => {
+  return request({
+    method: 'GET',
+    url: '/search/queryDriverNotTrainOrders',
+    params,
+  })
+}
