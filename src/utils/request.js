@@ -1,12 +1,16 @@
 // 基于axios封装的请求模块
 
 import axios from 'axios'
+import qs from 'qs'
 import JSONBig from 'json-bigint'
 import router from '@/router' //引入router
 
 import { BASE_URL } from '@/global/config'
 
 import { Dialog } from 'vant'
+
+// axios.defaults.headers.post['Content-Type'] =
+//   'application/x-www-form-urlencoded'
 
 // 创建一个 axios 实例 , 说白了就是复制一个 axios
 // 我们通过这个实例去发请求,把需要的配置 配置给这个实例来处理
@@ -46,6 +50,17 @@ request.interceptors.request.use(
   // config 是当前请求相关的配置信息对象
   // config 是可以修改的
   function (config) {
+    // POST传参序列化(添加请求拦截器)
+
+    if (config.method === 'post') {
+      // console.log('old config.data', config.data)
+      // 设置请求头 发送的数据是x-www-form-urlencoded 格式
+      config.headers['Content-Type'] = 'application/x-www-form-urlencoded'
+      // qs.stringify(object, [options]) 字符串化时，默认情况下，qs 对输出进行 URI 编码，以避免某些特殊字符对某些接口的调用造成请求失败。
+      //encode: false 禁用encode编码
+      config.data = qs.stringify(config.data, { encode: false })
+      // console.log('new config.data', config.data)
+    }
     // 然后我们就可以在允许请求出去之前定制统一业务功能处理
     // 例如：统一的设置 token
     // console.log('请求拦截器', config)

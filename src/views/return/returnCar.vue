@@ -19,7 +19,7 @@
         readonly
         clickable
         colon
-        name="车牌号码"
+        name="carID"
         :value="form.carID"
         label="车牌号码"
         @click="showCarID = true"
@@ -28,71 +28,89 @@
         readonly
         clickable
         colon
-        name="还车时间"
+        name="time"
         :value="form.endTime"
         label="还车时间"
         placeholder="点击选择还车时间"
-        @click="showCalendar = true"
+        @click="showDateTime"
         :rules="[{ required: true, message: '请选择还车时间' }]"
       />
-      <van-calendar v-model="showCalendar" @confirm="onConfirm" />
+      <!-- <van-calendar v-model="showCalendar" @confirm="onConfirm" /> -->
+      <van-popup
+        v-model="isShowDateTime"
+        position="bottom"
+        round
+        :style="{ height: '35%' }"
+      >
+        <van-datetime-picker
+          v-model="currentDate"
+          type="datetime"
+          title="请选择还车时间"
+          :min-date="minDate"
+          :max-date="maxDate"
+          :formatter="formatter"
+          @confirm="datetimeConfirm"
+          @cancel="isShowDateTime = false"
+          @change="datetimeChange"
+        />
+      </van-popup>
       <van-field
         colon
-        v-model="form.totalTime"
-        name="使用时长(天)"
+        v-model="form.totalDays"
+        name="totalDays"
         label="使用时长(天)"
       />
       <van-field
         colon
         v-model="form.basicFee"
-        name="基础费用"
+        name="basicFee"
         label="基础费用"
       />
       <van-field
         colon
         v-model="form.KilometersAfter"
-        name="收车里程"
+        name="KilometersAfter"
         label="收车里程"
         placeholder="请填写收车里程"
       />
       <van-field
         colon
         v-model="form.KilometersAll"
-        name="行驶里程"
+        name="KilometersAll"
         label="行驶里程"
         placeholder="自动计算出车前后的行驶里程"
       />
       <van-field
         colon
         v-model="form.OilAfter"
-        name="收车油量"
+        name="OilAfter"
         label="收车油量"
         placeholder="请填写收车油量"
       />
       <van-field
         colon
         v-model="form.roadFee"
-        name="过路费"
+        name="roadFee"
         label="过路费"
         placeholder="请填写过路费"
       />
       <van-field
         colon
         v-model="form.parkingFee"
-        name="停车费"
+        name="parkingFee"
         label="停车费"
         placeholder="请填写停车费"
       />
       <van-field
         colon
         v-model="form.driverFee"
-        name="司机费用"
+        name="driverFee"
         label="司机费用"
       />
       <van-field
         colon
         v-model="form.otherFee"
-        name="其他费用"
+        name="otherFee"
         label="其他费用"
       />
       <van-cell>
@@ -107,10 +125,10 @@
         <h4>其它信息</h4>
       </div>
       <van-field
-        v-model="form.otherMessage"
+        v-model="form.remark"
         rows="1"
         autosize
-        name="其它信息"
+        name="remark"
         type="textarea"
         placeholder="请填写其它相关信息"
       />
@@ -125,6 +143,8 @@
 
 <script>
 import { NavBar, Form, Field, Calendar, Cell, CellGroup, Button } from 'vant'
+// import dayjs from 'dayjs'
+var dayjs = require('dayjs')
 export default {
   name: 'returnCar',
   components: {
@@ -142,7 +162,7 @@ export default {
       form: {
         carID: '桂AA19L0 (自营)', // 车牌号码
         endTime: '', // 还车时间
-        totalTime: '2', // 使用时长
+        totalDays: '2', // 使用时长
         basicFee: '', // 基础费用
         KilometersAfter: '', // 收车里程
         KilometersBefore: '', // 出车里程
@@ -153,16 +173,55 @@ export default {
         parkingFee: '', // 停车费
         driverFee: '', // 司机费用
         otherFee: '', // 其他费用
-        otherMessage: '', // 其它信息
+        remark: '', // 其它信息
       },
-      showCalendar: false,
+      isShowDateTime: false,
+      minDate: new Date(2020, 0, 1),
+      maxDate: new Date(2025, 10, 1),
+      currentDate: new Date(),
     }
   },
-  computed: {},
+  computed: {
+    currentOrder() {
+      return this.$store.getters['order/currentOrder']
+    },
+  },
   watch: {},
-  created() {},
+  created() {
+    this.form.carID = this.currentOrder.carNumber
+  },
   mounted() {},
   methods: {
+    datetimeConfirm(e) {
+      let time = dayjs(e).format('YYYY-MM-DD HH:mm')
+      console.log(time)
+      this.form.endTime = time
+      this.isShowDateTime = false
+    },
+    showDateTime() {
+      this.isShowDateTime = !this.isShowDateTime
+    },
+    formatter(type, val) {
+      if (type === 'year') {
+        return val + '年'
+      }
+      if (type === 'month') {
+        return val + '月'
+      }
+      if (type === 'day') {
+        return val + '日'
+      }
+      if (type === 'hour') {
+        return val + '时'
+      }
+      if (type === 'minute') {
+        return val + '分'
+      }
+      if (type === 'second') {
+        return val + '秒'
+      }
+      return val
+    },
     onClickLeft() {
       this.$router.go(-1)
     },

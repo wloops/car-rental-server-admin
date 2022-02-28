@@ -32,10 +32,18 @@ export const setLogout = () => {
 }
 
 //账号方式登录
-export const accountLogin = data => {
+export const loginOfAccount = data => {
   return request({
     method: 'POST',
-    url: '/app/accountLogin',
+    url: '/app/apploginByAccount',
+    data,
+  })
+}
+// 手机验证码方式登录
+export const loginOfPhone = data => {
+  return request({
+    method: 'POST',
+    url: '/app/login',
     data,
   })
 }

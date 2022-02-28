@@ -3,11 +3,7 @@
   <div class="login">
     <div class="loginBox">
       <div class="topNav">
-        <van-nav-bar
-          title=""
-          left-arrow
-          @click-right="changLoginType"
-        >
+        <van-nav-bar title="" left-arrow @click-right="changLoginType">
           <template #right>
             <div class="register">
               <a v-if="loginType === true">验证码登录</a>
@@ -146,6 +142,8 @@
 import { Dialog, Toast } from 'vant'
 import { mapGetters, mapMutations } from 'vuex'
 import global_ from '@/global/config_global'
+import { loginOfAccount, loginOfPhone } from '@/api/user'
+
 export default {
   name: 'login',
   components: {
@@ -207,6 +205,7 @@ export default {
   created() {
     let storage = window.localStorage
     this.token = storage.getItem('token')
+    this.appid = storage.getItem('appid')
     this.show = true
     this.getCookie()
     this.getPK()
@@ -393,19 +392,14 @@ export default {
       var that = this
       console.log(this.token)
       console.log(this.appid)
-      this.$http
-        .post(
-          'http://www.paytunnel.cn/carRentalServerRH/app/apploginByAccount?_csrf=' +
-            this.token +
-            '&cipherText=' +
-            password_temp +
-            '&tellerNo=' +
-            this.username +
-            '&appId=' +
-            this.appid
-        )
-        .then(function (response) {
-          //请求成功
+      loginOfAccount({
+        _csrf: this.token,
+        cipherText: password_temp,
+        tellerNo: this.username,
+        appId: this.appid,
+      }).then(response => {
+        console.log('loginOfAccount res', response)
+        //请求成功
           var result = response.data.rs
           console.log(result)
           console.log('login response', response)
@@ -463,13 +457,94 @@ export default {
 
             // window.location.href = global_.clientUrl
           } else {
-            that.$dialog.alert({
-              message: result,
-            }).then(() => {
-              return false
-            })
+            that.$dialog
+              .alert({
+                message: result,
+              })
+              .then(() => {
+                return false
+              })
           }
-        })
+      })
+      // this.$http
+      //   .post(
+      //     'http://www.paytunnel.cn/carRentalServerRH/app/apploginByAccount?_csrf=' +
+      //       this.token +
+      //       '&cipherText=' +
+      //       password_temp +
+      //       '&tellerNo=' +
+      //       this.username +
+      //       '&appId=' +
+      //       this.appid
+      //   )
+      //   .then(function (response) {
+      //     //请求成功
+      //     var result = response.data.rs
+      //     console.log(result)
+      //     console.log('login response', response)
+      //     if (result == '1') {
+      //       console.log('账号登录成功', response.data)
+      //       let storage = window.localStorage
+      //       var userName = response.data.memberID
+      //       // var nickName = response.data.usernameLERNAME
+      //       var nickName = response.data.TELLERNAME
+      //       global_.userName = userName
+      //       global_.nickName = nickName
+      //       // global_.usernameLERCOMPANY = response.data.usernameLERCOMPANY
+      //       // global_.usernameLERROLE = response.data.usernameLERROLE
+      //       global_.token = response.data.token.token
+
+      //       /* --当刷新页面导致token不存在时,使用sessionStorage中的token--*/
+      //       // storage.setItem('unitToken', global_.token)
+      //       // storage.setItem('memberID', global_.userName)
+      //       // storage.setItem('usernameLERROLE', response.data.usernameLERROLE)
+      //       // storage.setItem(
+      //       //   'usernameLERCOMPANY1',
+      //       //   response.data.usernameLERCOMPANY
+      //       // )
+      //       // storage.setItem('nickName', nickName)
+      //       storage.setItem('userAdmin', JSON.stringify(response.data))
+
+      //       storage.setItem('adminMemberID', userName)
+      //       storage.setItem('adminNickName', nickName)
+      //       // 用户权限
+      //       storage.setItem('userRole', response.data.TELLERROLE)
+      //       // 单位token 存储到vuex(localStorage)
+      //       // that.$store.commit('setUnitToken', response.data.token.token)
+
+      //       // that.$toast.success('登录成功')
+      //       const toast = that.$toast.loading({
+      //         duration: 0, // 持续展示 toast
+      //         forbidClick: true,
+      //         message: '登录中...',
+      //       })
+
+      //       let second = 2
+      //       const timer = setInterval(() => {
+      //         second--
+      //         if (second) {
+      //           toast.message = `登录成功,${second}秒后跳转`
+      //         } else {
+      //           clearInterval(timer)
+      //           // 手动清除 Toast
+      //           that.$toast.clear()
+      //           // 登录成功返回上一级页面
+      //           // that.$router.go(-1)
+      //           that.$router.push('/')
+      //         }
+      //       }, 1000)
+
+      //       // window.location.href = global_.clientUrl
+      //     } else {
+      //       that.$dialog
+      //         .alert({
+      //           message: result,
+      //         })
+      //         .then(() => {
+      //           return false
+      //         })
+      //     }
+      //   })
         .catch(function (error) {
           //请求失败
           console.log('error:' + error)
