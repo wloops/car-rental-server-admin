@@ -73,6 +73,7 @@ import {
   getAvailableCar,
   assignSubstituteCar,
   assignCarOfSelf,
+  assignCarDeliveryCar,
 } from '@/api/assign'
 export default {
   name: 'assignCar',
@@ -149,7 +150,7 @@ export default {
     // 指派代驾车辆
     loadAssignSubstituteCar(params) {
       assignSubstituteCar(params).then(res => {
-        console.log('res', res)
+        console.log('指派代驾车辆', res)
         if (res.data.rs !== '1') {
           this.$toast.fail(res.data.rs)
           return false
@@ -158,9 +159,22 @@ export default {
         this.$router.go(-1)
       })
     },
+    // 租车单位自行提车
     loadAssignCarOfSelf(params) {
       assignCarOfSelf(params).then(res => {
-        console.log('res', res)
+        console.log('租车单位自行提车', res)
+        if (res.data.rs !== '1') {
+          this.$toast.fail(res.data.rs)
+          return false
+        }
+        this.$toast.success('出车成功')
+        this.$router.go(-1)
+      })
+    },
+    // 指派上门送车车辆
+    loadAssignCarDeliveryCar(params) {
+      assignCarDeliveryCar(params).then(res => {
+        console.log('指派上门送车车辆', res)
         if (res.data.rs !== '1') {
           this.$toast.fail(res.data.rs)
           return false
@@ -171,6 +185,13 @@ export default {
     },
     // 提交表单
     onSubmit(values) {
+      // 判断是否送车上门,是否有送门上次人员(delDriver),有则继续
+      if (this.currentOrder.carPickUpMode === '送车上门') {
+        if (this.currentOrder.delDriver === '') {
+          this.$toast.fail('请先指派送车上门人员')
+          return false
+        }
+      }
       this.$dialog
         .confirm({
           title: '提示',
@@ -199,22 +220,6 @@ export default {
             beginIndex: values.OilBefore,
             beginMileage: values.KilometersBefore,
           }
-          // srlIDForEngine:Splenwise微信预约点餐系统
-          // busiNameForEngine:汽车租赁业务
-          // busiFunNameForEngine:出租单位派车
-          // // miniProcNameForEngine:租车单位自提车
-          // assetsPrdName:汽车
-          // oilPrdName:燃油
-          // assetsStatus:1000
-          // billNo:14752202241401044622
-          // status:1
-          // remark:
-          // assetsSrlID:惠保汽车
-          // carID:粤A·8870L
-          // driver:惠保司机6
-          // oilSrlID:汽油
-          // beginIndex:60
-          // beginMileage:234
           if (
             this.currentOrder.orderDriveType === '自驾' &&
             this.currentOrder.carPickUpMode === '自行取车'
@@ -224,9 +229,13 @@ export default {
             this.loadAssignCarOfSelf(params)
           } else if (
             this.currentOrder.orderDriveType === '自驾' &&
-            this.conditions.carPickUpMode === '送车上门'
+            this.currentOrder.carPickUpMode === '送车上门'
           ) {
             // 调用租车单位送车上门
+            params.miniProcNameForEngine = '安排上门送车-不安排上门送车人员'
+            params.personStatus = '3'
+            params.status = '3'
+            this.loadAssignCarDeliveryCar(params)
           } else {
             params.miniProcNameForEngine = '安排代驾-安排代驾员'
             this.loadAssignSubstituteCar(params)

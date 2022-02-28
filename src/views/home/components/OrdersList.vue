@@ -114,7 +114,7 @@
                     <van-button
                       type="info"
                       size="small"
-                      @click="toAssignCar(item)"
+                      @click="carDelivered(item)"
                       v-if="item.orderStatusShow === '上门送车中'"
                       >已送达</van-button
                     >
@@ -137,6 +137,8 @@ import {
   getAllOrderOfDriver,
   getWaitOrderOfDriver,
 } from '@/api/order'
+
+import { assignCarRentalCollectedCar } from '@/api/assign'
 
 export default {
   name: 'OrdersList',
@@ -206,7 +208,7 @@ export default {
           this.actions[0].text = '司机：未指派'
         }
       }
-      if (item.orderStatusShow === '已提车') {
+      if (item.orderStatusShow !== '未提车') {
         this.actions[1].text = `已指派车辆：${item.carNumber}`
       } else {
         this.actions[1].text = `车辆：未指派`
@@ -308,6 +310,39 @@ export default {
       this.$store.commit('order/setIsAssignDriver', false)
       this.$store.commit('order/setCurrentOrder', item)
       this.$router.push('/return')
+    },
+    carDelivered(item) {
+      // 上门送车中,调用时改为已提车
+      console.log('carDelivered', item)
+      let params = {
+        billNo: item.billNo,
+        saleCmpName: '广州睿颢软件技术有限公司',
+        employeeName: item.delDriver,
+        srlIDForEngine: 'Splenwise微信预约点餐系统',
+        busiNameForEngine: '汽车租赁业务',
+        busiFunNameForEngine: '出租单位派车',
+        miniProcNameForEngine: '租车单位签收送车',
+      }
+      // 询问是否确定送达
+      this.$dialog
+        .confirm({
+          title: '提示',
+          message: '确定已送达？',
+        })
+        .then(() => {
+          // on confirm
+          assignCarRentalCollectedCar(params).then(res => {
+            if (res.data.rs === '1') {
+              this.$toast.success('已送达')
+              item.orderStatusShow = '已提车'
+            } else {
+              this.$toast.fail(res.data.rs)
+            }
+          })
+        })
+        .catch(() => {
+          // on cancel
+        })
     },
     loadAllOrder() {
       getAllOrder({

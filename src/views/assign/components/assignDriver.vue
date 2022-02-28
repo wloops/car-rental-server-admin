@@ -59,7 +59,11 @@
 </template>
 
 <script>
-import { getAvailableDriver, assignSubstituteDriver } from '@/api/assign'
+import {
+  getAvailableDriver,
+  assignSubstituteDriver,
+  assignCarDeliveryDriver,
+} from '@/api/assign'
 export default {
   name: 'assignCar',
   components: {},
@@ -141,10 +145,11 @@ export default {
     },
     // 提交表单
     onSubmit(values) {
-      this.$dialog.confirm({
-        title: '提示',
-        message: '确定指派该司机吗？此操作不可撤销！',
-      })
+      this.$dialog
+        .confirm({
+          title: '提示',
+          message: '确定指派该司机吗？此操作不可撤销！',
+        })
         .then(() => {
           // on confirm
           console.log('submit', values)
@@ -164,20 +169,49 @@ export default {
             remark: values.remark,
             driver: values.name,
           }
-          assignSubstituteDriver(params).then(res => {
-            console.log(res)
-            if (res.data.rs !== '1') {
-              this.$toast(res.data.rs)
-              return false
-            } else {
-              this.$toast.success('指派司机成功')
-              this.$router.go(-1)
-            }
-          })
+          // 逻辑判断
+          if (
+            this.currentOrder.orderDriveType === '自驾' &&
+            this.currentOrder.carPickUpMode === '送车上门'
+          ) {
+            params.miniProcNameForEngine = '安排上门送车-只指派代驾员'
+            params.personStatus = '3'
+            params.status = '3'
+            this.loadAssignCarDeliveryDriver(params)
+          } else {
+            // 指派代驾司机
+            this.loadAssignSubstituteDriver(params)
+          }
         })
         .catch(() => {
           // on cancel
         })
+    },
+    // 指派代驾司机
+    loadAssignSubstituteDriver(params) {
+      assignSubstituteDriver(params).then(res => {
+        console.log('指派代驾司机', res)
+        if (res.data.rs !== '1') {
+          this.$toast(res.data.rs)
+          return false
+        } else {
+          this.$toast.success('指派司机成功')
+          this.$router.go(-1)
+        }
+      })
+    },
+    // 指派上门送车人员
+    loadAssignCarDeliveryDriver(params) {
+      assignCarDeliveryDriver(params).then(res => {
+        console.log('指派上门送车人员', res)
+        if (res.data.rs !== '1') {
+          this.$toast(res.data.rs)
+          return false
+        } else {
+          this.$toast.success('指派司机成功')
+          this.$router.go(-1)
+        }
+      })
     },
   },
 }

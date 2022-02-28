@@ -50,3 +50,30 @@ export const assignCarOfSelf = params => {
     params,
   })
 }
+
+// (指派上门送车人员)ZCbtnCarDeliveryDriver
+export const assignCarDeliveryDriver = params => {
+  return request({
+    method: 'get',
+    url: '/insertReturn/ZCbtnCarDeliveryDriver',
+    params,
+  })
+}
+
+// (指派上门送车车辆)ZCbtnCarDeliveryCar
+export const assignCarDeliveryCar = params => {
+  return request({
+    method: 'get',
+    url: '/insertReturn/ZCbtnCarDeliveryCar',
+    params,
+  })
+}
+
+// (租车方已收车)ZCbtnCarRentalCollectedCar
+export const assignCarRentalCollectedCar = params => {
+  return request({
+    method: 'get',
+    url: '/insertReturn/ZCbtnCarRentalCollectedCar',
+    params,
+  })
+}
