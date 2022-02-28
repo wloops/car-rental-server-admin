@@ -142,7 +142,7 @@
 import { Dialog, Toast } from 'vant'
 import { mapGetters, mapMutations } from 'vuex'
 import global_ from '@/global/config_global'
-import { loginOfAccount, loginOfPhone } from '@/api/user'
+import { getSmsCode, loginOfAccount, loginOfPhone } from '@/api/user'
 
 export default {
   name: 'login',
@@ -218,36 +218,55 @@ export default {
     }),
     // 获取验证码
     getCode() {
-      var that = this
+      // var that = this
       //做操作,获取手机号判断手机号是否为空，获取验证码
       if (this.tel == '') {
         Toast.fail('手机号码不得为空')
         return false
       }
       //发请求
-      this.$http
-        .post(
-          'http://www.paytunnel.cn/carRentalServerRH/insertReturn/genAuthCodeForMobile?_csrf=' +
-            this.token +
-            '&mobile=' +
-            this.tel
-        )
-        .then(function (response) {
-          //请求成功
-          var result = response.data.rs
-          if (result == '1') {
-            that.showBg = false
-            that.Timmer()
-            Toast.fail('验证码发送成功,请注意查收')
-          } else {
-            Toast.fail(result)
-            return false
-          }
-        })
-        .catch(function (error) {
-          //请求失败
-          console.log('error:' + error)
-        })
+      getSmsCode({
+        _csrf: this.token,
+        mobile: this.tel,
+      }).then(res => {
+        //请求成功
+        var result = res.data.rs
+        if (result == '1') {
+          this.showBg = false
+          this.Timmer()
+          this.$toast.fail('验证码发送成功,请注意查收')
+        } else {
+          Toast.fail(result)
+          return false
+        }
+      })
+      .catch(err => {
+        //请求失败
+        console.log('error:' + err)
+      })
+      // this.$http
+      //   .post(
+      //     'http://www.paytunnel.cn/carRentalServerRH/insertReturn/genAuthCodeForMobile?_csrf=' +
+      //       this.token +
+      //       '&mobile=' +
+      //       this.tel
+      //   )
+      //   .then(function (response) {
+      //     //请求成功
+      //     var result = response.data.rs
+      //     if (result == '1') {
+      //       that.showBg = false
+      //       that.Timmer()
+      //       Toast.fail('验证码发送成功,请注意查收')
+      //     } else {
+      //       Toast.fail(result)
+      //       return false
+      //     }
+      //   })
+      //   .catch(function (error) {
+      //     //请求失败
+      //     console.log('error:' + error)
+      //   })
     },
     loginSubmit() {
       if (this.loginType === true) {
@@ -275,61 +294,107 @@ export default {
       console.log('appid', appid)
       console.log('memberID', memberID)
       console.log('sms', this.sms)
-      this.$http
-        .post(
-          'http://www.paytunnel.cn/carRentalServerRH/app/login?_csrf=' +
-            this.token +
-            '&appId=' +
-            appid +
-            '&mobile=' +
-            this.tel +
-            '&memberID=' +
-            memberID +
-            '&authCode=' +
-            this.sms
-        )
-        .then(function (response) {
-          //请求成功
-          var result = response.data.rs
+      loginOfPhone({
+        _csrf: this.token,
+        appid: appid,
+        mobile: this.tel,
+        memberID: memberID,
+        authCode: this.sms,
+      }).then(res => {
+        console.log('res', res)
+        //请求成功
+          var result = res.data.rs
           that.dataLoading = false
           if (result == '1') {
-            console.log('验证码登录成功', response.data)
+            console.log('验证码登录成功', res.data)
             let storage = window.localStorage
-            var userName = response.data.memberID
-            var nickName = response.data.TELLERNAME
+            var userName = res.data.memberID
+            var nickName = res.data.TELLERNAME
             global_.userName = userName
             global_.nickName = nickName
-            global_.TELLERCOMPANY = response.data.TELLERCOMPANY
-            global_.TELLERROLE = response.data.TELLERROLE
-            global_.token = response.data.token.token
+            global_.TELLERCOMPANY = res.data.TELLERCOMPANY
+            global_.TELLERROLE = res.data.TELLERROLE
+            global_.token = res.data.token.token
             /* --当刷新页面导致token不存在时,使用sessionStorage中的token--*/
             // storage.setItem('token', global_.token)
             // storage.setItem('memberID', global_.userName)
-            // storage.setItem('TELLERROLE', response.data.TELLERROLE)
-            storage.setItem('userAdmin', JSON.stringify(response.data))
+            // storage.setItem('TELLERROLE', res.data.TELLERROLE)
+            storage.setItem('userAdmin', JSON.stringify(res.data))
             storage.setItem('adminNickName', nickName)
-            // storage.setItem('TELLERCOMPANY1', response.data.TELLERCOMPANY)
+            // storage.setItem('TELLERCOMPANY1', res.data.TELLERCOMPANY)
 
-            storage.setItem('adminMemberID', response.data.memberID)
+            storage.setItem('adminMemberID', res.data.memberID)
             // 用户权限
-            storage.setItem('userRole', response.data.TELLERROLE)
+            storage.setItem('userRole', res.data.TELLERROLE)
             // window.location.href = global_.clientUrl
             // 登录成功，返回首页
             that.$router.push({
               path: '/',
             })
           } else {
-            Dialog.alert({
+            this.$dialog.alert({
               message: result,
             }).then(() => {
               return false
             })
           }
-        })
-        .catch(function (error) {
-          //请求失败
-          console.log('error:' + error)
-        })
+      })
+
+      // this.$http
+      //   .post(
+      //     'http://www.paytunnel.cn/carRentalServerRH/app/login?_csrf=' +
+      //       this.token +
+      //       '&appId=' +
+      //       appid +
+      //       '&mobile=' +
+      //       this.tel +
+      //       '&memberID=' +
+      //       memberID +
+      //       '&authCode=' +
+      //       this.sms
+      //   )
+      //   .then(function (response) {
+      //     //请求成功
+      //     var result = response.data.rs
+      //     that.dataLoading = false
+      //     if (result == '1') {
+      //       console.log('验证码登录成功', response.data)
+      //       let storage = window.localStorage
+      //       var userName = response.data.memberID
+      //       var nickName = response.data.TELLERNAME
+      //       global_.userName = userName
+      //       global_.nickName = nickName
+      //       global_.TELLERCOMPANY = response.data.TELLERCOMPANY
+      //       global_.TELLERROLE = response.data.TELLERROLE
+      //       global_.token = response.data.token.token
+      //       /* --当刷新页面导致token不存在时,使用sessionStorage中的token--*/
+      //       // storage.setItem('token', global_.token)
+      //       // storage.setItem('memberID', global_.userName)
+      //       // storage.setItem('TELLERROLE', response.data.TELLERROLE)
+      //       storage.setItem('userAdmin', JSON.stringify(response.data))
+      //       storage.setItem('adminNickName', nickName)
+      //       // storage.setItem('TELLERCOMPANY1', response.data.TELLERCOMPANY)
+
+      //       storage.setItem('adminMemberID', response.data.memberID)
+      //       // 用户权限
+      //       storage.setItem('userRole', response.data.TELLERROLE)
+      //       // window.location.href = global_.clientUrl
+      //       // 登录成功，返回首页
+      //       that.$router.push({
+      //         path: '/',
+      //       })
+      //     } else {
+      //       Dialog.alert({
+      //         message: result,
+      //       }).then(() => {
+      //         return false
+      //       })
+      //     }
+      //   })
+      //   .catch(function (error) {
+      //     //请求失败
+      //     console.log('error:' + error)
+      //   })
     },
     // backPage() {
     //   this.$router.back()

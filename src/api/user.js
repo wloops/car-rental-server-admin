@@ -39,11 +39,21 @@ export const loginOfAccount = data => {
     data,
   })
 }
+
 // 手机验证码方式登录
 export const loginOfPhone = data => {
   return request({
     method: 'POST',
     url: '/app/login',
+    data,
+  })
+}
+
+// 获取短信验证码
+export const getSmsCode = data => {
+  return request({
+    method: 'POST',
+    url: '/insertReturn/genAuthCodeForMobile',
     data,
   })
 }

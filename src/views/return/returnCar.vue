@@ -143,7 +143,6 @@
 
 <script>
 import { NavBar, Form, Field, Calendar, Cell, CellGroup, Button } from 'vant'
-// import dayjs from 'dayjs'
 var dayjs = require('dayjs')
 export default {
   name: 'returnCar',
