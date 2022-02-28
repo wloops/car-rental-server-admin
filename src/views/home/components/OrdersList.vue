@@ -9,7 +9,11 @@
           @load="onLoad"
         >
           <van-grid :gutter="15" :column-num="1">
-            <van-grid-item v-for="item in list" :key="item.orderNumber">
+            <van-grid-item
+              v-for="(item, index) in list"
+              :key="item.orderNumber"
+              @click="stopPropagation"
+            >
               <div class="orderItem">
                 <div class="useStatus">
                   <span class="orderTopText">{{ item.orderDriveType }}</span>
@@ -39,28 +43,82 @@
                   <div class="orderAddress van-multi-ellipsis--l2">
                     接车地址 : {{ item.deliveryAddr }}
                   </div>
+                  <p>
+                    取车方式 :
+                    {{
+                      item.orderDriveType === '代驾'
+                        ? '送车上门'
+                        : item.carPickUpMode
+                    }}
+                  </p>
+                  <p>
+                    还车方式 :
+                    {{
+                      item.orderDriveType === '代驾'
+                        ? '上门服务'
+                        : item.carReturnMode
+                    }}
+                  </p>
                 </div>
-                <div class="orderBtn" v-if="item.orderStatusShow === '未提车'">
-                  <van-button
-                    type="info"
-                    size="small"
-                    @click="toAssignDriver(item)"
-                    >指派司机</van-button
+
+                <div class="orderBtn">
+                  <van-popover
+                    v-model="showPopover[index]"
+                    trigger="click"
+                    placement="top-start"
+                    :actions="actions"
+                    @select="onSelect"
+                    v-if="item.orderStatusShow !== '已还车'"
                   >
-                  <van-button
-                    type="info"
-                    size="small"
-                    @click="toAssignCar(item)"
-                    >指派车辆</van-button
+                    <template #reference>
+                      <van-button
+                        type="primary"
+                        size="small"
+                        @click="assignInfo(item)"
+                      >
+                        指派状态</van-button
+                      >
+                    </template>
+                  </van-popover>
+
+                  <div
+                    class="orderBtn"
+                    v-if="item.orderStatusShow === '未提车'"
                   >
-                </div>
-                <div class="orderBtn returnCar" v-else>
-                  <van-button
-                    type="info"
-                    size="small"
-                    @click="toReturnCar(item)"
-                    >还车/计算费用</van-button
-                  >
+                    <van-button
+                      type="info"
+                      size="small"
+                      @click="toAssignDriver(item)"
+                      v-if="assignDriverBtn(item)"
+                      >指派司机</van-button
+                    >
+                    <van-button
+                      type="info"
+                      size="small"
+                      @click="toAssignCar(item)"
+                      v-if="item.orderStatusShow === '未提车'"
+                      >指派车辆</van-button
+                    >
+                  </div>
+                  <div class="orderBtn returnCar">
+                    <van-button
+                      type="info"
+                      size="small"
+                      @click="toReturnCar(item)"
+                      v-if="
+                        item.orderStatusShow === '上门收车中' ||
+                        item.orderStatusShow === '已提车'
+                      "
+                      >还车/计算费用</van-button
+                    >
+                    <van-button
+                      type="info"
+                      size="small"
+                      @click="toAssignCar(item)"
+                      v-if="item.orderStatusShow === '上门送车中'"
+                      >已送达</van-button
+                    >
+                  </div>
                 </div>
               </div>
             </van-grid-item>
@@ -100,11 +158,18 @@ export default {
       pageNum: 0,
       pageSize: 10,
       totalNum: 0,
+
+      showPopover: [], // 是否显示当前气泡弹窗
+      // 通过 actions 属性来定义菜单选项
+      actions: [{ text: '司机:未指派' }, { text: '车辆:未指派' }],
     }
   },
   computed: {
     // 是否指派司机
     isAssignDriver() {},
+
+    // 显示指派车辆按钮
+    assignCarBtn() {},
   },
   watch: {},
   created() {
@@ -113,6 +178,72 @@ export default {
 
   mounted() {},
   methods: {
+    //是否显示当前气泡弹窗 js 重叠处理
+    stopPropagation(e) {
+      e = e || window.event
+      if (e.stopPropagation) {
+        //W3C阻止冒泡方法
+        e.stopPropagation()
+      } else {
+        e.cancelBubble = true //IE阻止冒泡方法
+      }
+    },
+    assignInfo(item) {
+      // 初始化 防止覆盖
+      this.actions = [{ text: '司机：未指派' }, { text: '车辆：未指派' }]
+      if (item.delDriver !== '' || item.subDriver !== '') {
+        this.actions[0].text = `已指派司机：${
+          item.delDriver ? item.delDriver : item.subDriver
+        }`
+      } else {
+        if (
+          item.orderDriveType === '自驾' &&
+          item.carPickUpMode === '自行取车' &&
+          item.carReturnMode === '自行还车'
+        ) {
+          this.actions[0].text = '司机：不需要'
+        } else {
+          this.actions[0].text = '司机：未指派'
+        }
+      }
+      if (item.orderStatusShow === '已提车') {
+        this.actions[1].text = `已指派车辆：${item.carNumber}`
+      } else {
+        this.actions[1].text = `车辆：未指派`
+      }
+    },
+    // 显示指派司机按钮
+    assignDriverBtn(item) {
+      if (item.orderDriveType === '自驾' && item.orderStatusShow === '未提车') {
+        if (item.carPickUpMode === '自行取车') {
+          return false
+        } else {
+          if (item.delDriver === '') {
+            return true
+          } else {
+            return false
+          }
+        }
+      } else if (
+        item.orderDriveType === '自驾' &&
+        item.orderStatusShow === '已提车'
+      ) {
+        if (item.carReturnMode === '自行还车') {
+          return false
+        } else {
+          return true
+        }
+      } else if (
+        item.orderDriveType === '代驾' &&
+        item.orderStatusShow === '未提车'
+      ) {
+        if (item.subDriver === '') {
+          return true
+        } else {
+          return false
+        }
+      }
+    },
     onLoad() {
       // 异步更新数据
       // setTimeout 仅做示例，真实场景中一般为 ajax 请求
@@ -169,10 +300,13 @@ export default {
     toAssignDriver(item) {
       console.log('toAssignDriver', item)
       this.$store.commit('order/setIsAssignDriver', false)
+      this.$store.commit('order/setCurrentOrder', item)
       this.$router.push('/assign')
     },
     toReturnCar(item) {
       console.log('toReturnCar', item)
+      this.$store.commit('order/setIsAssignDriver', false)
+      this.$store.commit('order/setCurrentOrder', item)
       this.$router.push('/return')
     },
     loadAllOrder() {
@@ -181,6 +315,7 @@ export default {
         numOfPerPage: this.pageSize,
       }).then(res => {
         if (res.data.rs === '1') {
+          console.log('管理员全部订单', res)
           console.log('管理员全部订单', res.data)
           this.orderList = this.orderList.concat(res.data.queryCarMercAllOrders)
           this.totalNum = res.data.queryCarMercAllOrders_totalRecNum
@@ -291,7 +426,6 @@ export default {
   width: 100%;
   line-height: 1rem;
   margin-top: -0.3rem;
-  margin-bottom: 0.5rem;
 }
 .orderBtn {
   display: flex;

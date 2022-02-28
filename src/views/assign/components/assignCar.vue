@@ -18,7 +18,7 @@
       <!-- 出车时间 -->
       <van-field
         v-model="form.startTime"
-        name="出车时间"
+        name="time"
         label="出车时间"
         readonly
       />
@@ -26,7 +26,7 @@
       <van-field
         readonly
         clickable
-        name="车牌号码"
+        name="carID"
         :value="form.carID"
         label="车牌号码"
         placeholder="点击选择车辆"
@@ -43,18 +43,17 @@
       </van-popup>
       <van-field
         v-model="form.KilometersBefore"
-        name="公里数"
+        name="KilometersBefore"
         label="公里数"
-        readonly
       />
-      <van-field v-model="form.OilBefore" name="油量" label="油量" readonly />
+      <van-field v-model="form.OilBefore" name="OilBefore" label="油量" />
       <div class="otherInfo">
         <h4>其它信息</h4>
         <van-field
-          v-model="form.otherMessage"
+          v-model="form.remark"
           rows="3"
           autosize
-          name="备注"
+          name="remark"
           type="textarea"
           placeholder="填写其它相关信息"
         />
@@ -70,6 +69,11 @@
 </template>
 
 <script>
+import {
+  getAvailableCar,
+  assignSubstituteCar,
+  assignCarOfSelf,
+} from '@/api/assign'
 export default {
   name: 'assignCar',
   components: {},
@@ -83,7 +87,8 @@ export default {
         OilBefore: '',
         driverName: '',
         driverPhone: '',
-        otherMessage: '',
+        remark: '',
+        billNo: '',
       },
       showCarID: false,
       showDriver: false,
@@ -103,15 +108,30 @@ export default {
   },
   watch: {},
   created() {
-    console.log('created car ',this.currentOrder)
-    this.form.startTime = this.currentOrder.CARUSETIMEBEGIN + ' ' + this.currentOrder.orderStartTime
+    this.loadAvailableCar()
+    console.log('created car ', this.currentOrder)
+    this.form.startTime =
+      this.currentOrder.CARUSETIMEBEGIN + ' ' + this.currentOrder.orderStartTime
+    this.form.billNo = this.currentOrder.billNo
   },
   mounted() {},
   methods: {
+    loadAvailableCar() {
+      getAvailableCar({
+        carType: this.currentOrder.carType,
+      }).then(res => {
+        console.log('res', res)
+        if (res.data.rs !== '1') {
+          return false
+        }
+        this.carIDs = res.data.queryAvailableCarsNumber.map(item => {
+          return `${item.srlID}-${item.carNumber}-${item.carClassify}`
+        })
+      })
+    },
     onClickLeft() {
       this.$router.go(-1)
     },
-
     onConfirm(value) {
       this.form.carID = value
       // if (value.indexOf('挂靠') > -1) {
@@ -122,14 +142,99 @@ export default {
       //   this.form.driverName = ''
       //   this.form.driverPhone = ''
       // }
-      this.form.KilometersBefore = '120000km'
-      this.form.OilBefore = '12L'
+      this.form.KilometersBefore = ''
+      this.form.OilBefore = ''
       this.showCarID = false
+    },
+    // 指派代驾车辆
+    loadAssignSubstituteCar(params) {
+      assignSubstituteCar(params).then(res => {
+        console.log('res', res)
+        if (res.data.rs !== '1') {
+          this.$toast.fail(res.data.rs)
+          return false
+        }
+        this.$message.success('出车成功')
+        this.$router.go(-1)
+      })
+    },
+    loadAssignCarOfSelf(params) {
+      assignCarOfSelf(params).then(res => {
+        console.log('res', res)
+        if (res.data.rs !== '1') {
+          this.$toast.fail(res.data.rs)
+          return false
+        }
+        this.$toast.success('出车成功')
+        this.$router.go(-1)
+      })
     },
     // 提交表单
     onSubmit(values) {
-      console.log('submit', values)
-      Toast('出车成功')
+      this.$dialog
+        .confirm({
+          title: '提示',
+          message: '确定出车吗？此操作不可撤销!',
+        })
+        .then(() => {
+          // on confirm
+          console.log('submit', values)
+          let srlID = values.carID.split('-')[0]
+          let carID = values.carID.split('-')[1]
+          let params = {
+            srlIDForEngine: 'Splenwise微信预约点餐系统',
+            busiNameForEngine: '汽车租赁业务',
+            busiFunNameForEngine: '出租单位派车',
+            miniProcNameForEngine: '安排代驾-不安排代驾员',
+            assetsPrdName: '汽车',
+            oilPrdName: '燃油',
+            assetsStatus: '1000',
+            personStatus: '2',
+            billNo: this.form.billNo,
+            status: '1',
+            remark: values.remark,
+            assetsSrlID: srlID,
+            carID: carID,
+            oilSrlID: '汽油',
+            beginIndex: values.OilBefore,
+            beginMileage: values.KilometersBefore,
+          }
+          // srlIDForEngine:Splenwise微信预约点餐系统
+          // busiNameForEngine:汽车租赁业务
+          // busiFunNameForEngine:出租单位派车
+          // // miniProcNameForEngine:租车单位自提车
+          // assetsPrdName:汽车
+          // oilPrdName:燃油
+          // assetsStatus:1000
+          // billNo:14752202241401044622
+          // status:1
+          // remark:
+          // assetsSrlID:惠保汽车
+          // carID:粤A·8870L
+          // driver:惠保司机6
+          // oilSrlID:汽油
+          // beginIndex:60
+          // beginMileage:234
+          if (
+            this.currentOrder.orderDriveType === '自驾' &&
+            this.currentOrder.carPickUpMode === '自行取车'
+          ) {
+            // 调用租车单位自行提车
+            params.miniProcNameForEngine = '租车单位自提车'
+            this.loadAssignCarOfSelf(params)
+          } else if (
+            this.currentOrder.orderDriveType === '自驾' &&
+            this.conditions.carPickUpMode === '送车上门'
+          ) {
+            // 调用租车单位送车上门
+          } else {
+            params.miniProcNameForEngine = '安排代驾-安排代驾员'
+            this.loadAssignSubstituteCar(params)
+          }
+        })
+        .catch(() => {
+          // on cancel
+        })
     },
   },
 }

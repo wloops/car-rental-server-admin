@@ -51,6 +51,7 @@ import {
   AddressEdit,
   Dialog,
   PasswordInput,
+  Popover,
 } from 'vant'
 
 const components = [
@@ -105,6 +106,7 @@ const components = [
   AddressEdit,
   Dialog,
   PasswordInput,
+  Popover,
 ]
 
 function install(Vue) {

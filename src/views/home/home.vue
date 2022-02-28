@@ -134,6 +134,7 @@ export default {
   methods: {
     loadIncome() {
       getIncome().then(res => {
+        console.log('income:', res)
         console.log('income:', res.data)
         if (res.data.rs === '1') {
           let income = res.data.queryIncomeOfMonthAndDay[0]
