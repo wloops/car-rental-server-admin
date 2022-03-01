@@ -63,6 +63,7 @@ import {
   getAvailableDriver,
   assignSubstituteDriver,
   assignCarDeliveryDriver,
+  assignCarCollectDriver,
 } from '@/api/assign'
 export default {
   name: 'assignCar',
@@ -159,6 +160,7 @@ export default {
             srlIDForEngine: 'Splenwise微信预约点餐系统',
             busiNameForEngine: '汽车租赁业务',
             busiFunNameForEngine: '出租单位派车',
+            saleCmpName: this.currentOrder.saleCmpName,
             miniProcNameForEngine: '安排代驾-只指派代驾员',
             assetsPrdName: '汽车',
             oilPrdName: '燃油',
@@ -178,6 +180,13 @@ export default {
             params.personStatus = '3'
             params.status = '3'
             this.loadAssignCarDeliveryDriver(params)
+          } else if (
+            this.currentOrder.orderDriveType === '自驾' &&
+            this.currentOrder.carReturnMode === '上门服务'
+          ) {
+            params.miniProcNameForEngine = '安排上门收车'
+            params.busiFunNameForEngine = '租车单位还车'
+            this.loadAssignCarCollectDriver(params)
           } else {
             // 指派代驾司机
             this.loadAssignSubstituteDriver(params)
@@ -204,6 +213,19 @@ export default {
     loadAssignCarDeliveryDriver(params) {
       assignCarDeliveryDriver(params).then(res => {
         console.log('指派上门送车人员', res)
+        if (res.data.rs !== '1') {
+          this.$toast(res.data.rs)
+          return false
+        } else {
+          this.$toast.success('指派司机成功')
+          this.$router.go(-1)
+        }
+      })
+    },
+    // 指派上门收车人员
+    loadAssignCarCollectDriver(params) {
+      assignCarCollectDriver(params).then(res => {
+        console.log('指派上门收车人员', res)
         if (res.data.rs !== '1') {
           this.$toast(res.data.rs)
           return false
