@@ -69,11 +69,29 @@ export const assignCarDeliveryCar = params => {
   })
 }
 
+// (指派上门收车人员)ZCbtnCarCollectDriver
+export const assignCarCollectDriver = params => {
+  return request({
+    method: 'get',
+    url: '/insertReturn/ZCbtnCarCollectDriver',
+    params,
+  })
+}
+
 // (租车方已收车)ZCbtnCarRentalCollectedCar
 export const assignCarRentalCollectedCar = params => {
   return request({
     method: 'get',
     url: '/insertReturn/ZCbtnCarRentalCollectedCar',
+    params,
+  })
+}
+
+// (租车单位自行还车)ZCbtnReturnCarBySelf
+export const assignReturnCarBySelf = params => {
+  return request({
+    method: 'get',
+    url: '/insertReturn/ZCbtnReturnCarBySelf',
     params,
   })
 }
