@@ -213,31 +213,33 @@ Vue.prototype.login = function (callback) {
   let appid = ''
   let REALTERMTYPE = ''
   let REALUSERNAME = ''
-  let appid_REALTERMTYPE_REALUSERNAME = ''
+  // let appid_REALTERMTYPE_REALUSERNAME = ''
   let url = '/currencyLogin/login'
   console.log('param::' + param)
   if (param.indexOf('appid') != -1) {
-    appid_REALTERMTYPE_REALUSERNAME = param.substring(
-      param.indexOf('=') + 1,
-      param.indexOf('code') - 1
-    )
-
-    appid = appid_REALTERMTYPE_REALUSERNAME.split('&')[0]
-    REALTERMTYPE = appid_REALTERMTYPE_REALUSERNAME.split('&')[1]
-    REALUSERNAME = appid_REALTERMTYPE_REALUSERNAME.split('&')[2]
+    let params = param.split('&')
+    params.forEach((item, index, err) => {
+      if (item.indexOf('appid') != -1) {
+        appid = item.substring(item.indexOf('=') + 1)
+      }
+      if (item.indexOf('REALTERMTYPE') != -1) {
+        REALTERMTYPE = item.substring(item.indexOf('=') + 1)
+      }
+      if (item.indexOf('REALUSERNAME') != -1) {
+        REALUSERNAME = item.substring(item.indexOf('=') + 1)
+      }
+      if (item.indexOf('code') != -1) {
+        code = item.substring(item.indexOf('=') + 1)
+      }
+    })
     storage.setItem('appid', appid)
-    code = param.substring(
-      param.indexOf('code') + 5,
-      param.indexOf('state') - 1
-    )
+
     console.log('appid::' + appid)
     console.log('code::' + code)
-    // REALTERMTYPE = '微信预约点餐公众号'
-    url = url + '?code=' + code + '&appid=' + appid_REALTERMTYPE_REALUSERNAME
-    storage.setItem(
-      'appid_REALTERMTYPE_REALUSERNAME',
-      appid_REALTERMTYPE_REALUSERNAME
-    )
+    console.log('REALTERMTYPE::' + REALTERMTYPE)
+    console.log('REALUSERNAME::' + REALUSERNAME)
+
+    storage.setItem('REALUSERNAME', REALUSERNAME)
   }
   if (appid.length < 18) {
     // 解决分享过来时获取不到appid的问题,从分享登录时存入sessionStorage中重新获取

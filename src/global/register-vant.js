@@ -52,6 +52,7 @@ import {
   Dialog,
   PasswordInput,
   Popover,
+  Switch,
 } from 'vant'
 
 const components = [
@@ -107,6 +108,7 @@ const components = [
   Dialog,
   PasswordInput,
   Popover,
+  Switch,
 ]
 
 function install(Vue) {

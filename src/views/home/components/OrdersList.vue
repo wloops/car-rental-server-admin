@@ -316,7 +316,7 @@ export default {
       console.log('carDelivered', item)
       let params = {
         billNo: item.billNo,
-        saleCmpName: '广州睿颢软件技术有限公司',
+        saleCmpName: item.saleCmpName,
         employeeName: item.delDriver,
         srlIDForEngine: 'Splenwise微信预约点餐系统',
         busiNameForEngine: '汽车租赁业务',
