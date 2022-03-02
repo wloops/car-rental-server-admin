@@ -155,7 +155,7 @@ export default {
           this.$toast.fail(res.data.rs)
           return false
         }
-        this.$message.success('出车成功')
+        this.$toast.success('出车成功')
         this.$router.go(-1)
       })
     },
@@ -237,7 +237,7 @@ export default {
             params.status = '3'
             this.loadAssignCarDeliveryCar(params)
           } else {
-            params.miniProcNameForEngine = '安排代驾-安排代驾员'
+            // params.miniProcNameForEngine = '安排代驾-安排代驾员'
             this.loadAssignSubstituteCar(params)
           }
         })

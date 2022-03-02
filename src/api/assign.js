@@ -95,3 +95,12 @@ export const assignReturnCarBySelf = params => {
     params,
   })
 }
+
+// (还车时查询行驶里程)queryMileage
+export const queryMileage = params => {
+  return request({
+    method: 'get',
+    url: '/search/queryMileage',
+    params,
+  })
+}

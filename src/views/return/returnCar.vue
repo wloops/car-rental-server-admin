@@ -56,6 +56,7 @@
         colon
         v-model="form.useDays"
         name="useDays"
+        readonly
         label="使用时长(天)"
       />
       <van-field
@@ -72,14 +73,16 @@
         name="KilometersAfter"
         label="收车里程"
         placeholder="请填写收车里程"
+        @blur="countKm"
       />
-      <!-- <van-field
+      <van-field
         colon
-        v-model="form.KilometersAll"
+        v-model="KilometersAll"
         name="KilometersAll"
         label="行驶里程"
+        readonly
         placeholder="自动计算出车前后的行驶里程"
-      /> -->
+      />
       <van-field
         colon
         v-model="form.OilAfter"
@@ -220,7 +223,7 @@
 <script>
 var dayjs = require('dayjs')
 import { BASE_COMNAME } from '@/global/config'
-import { assignReturnCarBySelf } from '@/api/assign'
+import { assignReturnCarBySelf, queryMileage } from '@/api/assign'
 
 export default {
   name: 'returnCar',
@@ -228,6 +231,7 @@ export default {
   props: {},
   data() {
     return {
+      KilometersAll:'',
       form: {
         // carID: '桂AA19L0 (自营)', // 车牌号码
         endTime: '', // 还车时间
@@ -235,7 +239,7 @@ export default {
         // basicFee: '', // 基础费用
         KilometersAfter: '', // 收车里程
         KilometersBefore: '', // 出车里程
-        KilometersAll: '', // 行驶里程（总里程）
+        // KilometersAll: '', // 行驶里程（总里程）
         OilAfter: '', // 收车油量
         OilBefore: '', // 出车油量
         roadFee: '', // 过路费
@@ -284,6 +288,8 @@ export default {
   watch: {},
   created() {
     this.form = this.currentOrder
+    this.form.endTime =
+      this.currentOrder.CARUSETIMEEND + ' ' + this.currentOrder.orderEndTime
   },
   mounted() {},
   methods: {
@@ -291,6 +297,24 @@ export default {
       let time = dayjs(e).format('YYYY-MM-DD HH:mm')
       console.log(time)
       this.form.endTime = time
+      // 根据选择的时间计算相隔天数
+      let startDay = dayjs(this.currentOrder.CARUSETIMEBEGIN)
+      let endDay = dayjs(time)
+      let startTime = this.currentOrder.orderStartTime
+      let endTime = dayjs(e).format('HH:mm:ss')
+      let diff = endDay.diff(startDay, 'day')
+
+      let diffDays = 0
+      if (diff > 0) {
+        if (startTime < endTime) {
+          diffDays = diff + 1
+        }
+        diffDays = diff
+      } else {
+        diffDays = 1
+      }
+      this.form.useDays = diffDays
+
       this.isShowDateTime = false
     },
     showDateTime() {
@@ -352,10 +376,11 @@ export default {
         remark: values.remark, // 其它信息
       }
       console.log(params)
-      this.$dialog.confirm({
-        title: '提示',
-        message: '确认还车吗？',
-      })
+      this.$dialog
+        .confirm({
+          title: '提示',
+          message: '确认还车吗？',
+        })
         .then(() => {
           // on confirm
           if (
@@ -400,6 +425,32 @@ export default {
         this.trafficTicketTotal = 0.0
       }
     },
+    countKm() {
+      //{
+      // "rs": "1",
+      // "queryMileage_totalRecNum": 1,
+      // "queryMileage": [
+      // {
+      // "drivingFee": "199.80",
+      // "beginMileage": "1000",
+      // "endMileage": "1111",
+      // "billNo": "14752203021457481132",
+      // "priceAfterDiscount": "1.80",
+      // "mileage": "111"
+      // }
+      // ]
+      // }
+      // event.preventDefault()
+      queryMileage({
+        billNo: this.currentOrder.billNo,
+        endMileage: this.form.KilometersAfter,
+      }).then(res => {
+        console.log('查询行驶里程', res)
+        if (res.data.rs === '1') {
+          this.KilometersAll = res.data.queryMileage[0].mileage
+        }
+      })
+    },
     addItem() {
       this.trafficTickets.push({
         fee: '',
@@ -407,7 +458,7 @@ export default {
       this.trafficNum++
     },
     removeItem(item, index) {
-      thistrafficNum--
+      this.trafficNum--
       this.trafficTickets.splice(index, 1)
       this.feeAdding()
       console.log(this.trafficTickets, '删除')
