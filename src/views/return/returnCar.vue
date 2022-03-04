@@ -54,26 +54,29 @@
       </van-popup>
       <van-field
         colon
+        readonly
         v-model="form.useDays"
         name="useDays"
-        readonly
         label="使用时长(天)"
       />
       <van-field
         colon
-        v-model="form.orderTotalPrice"
+        readonly
+        v-model="basicFee"
         type="number"
-        name="orderTotalPrice"
+        name="basicFee"
         label="基础费用"
       />
       <van-field
         colon
+        required
         v-model="form.KilometersAfter"
         type="number"
         name="KilometersAfter"
         label="收车里程"
         placeholder="请填写收车里程"
         @blur="countKm"
+        :rules="[{ required: true, message: '请填写收车里程' }]"
       />
       <van-field
         colon
@@ -85,11 +88,14 @@
       />
       <van-field
         colon
+        required
         v-model="form.OilAfter"
         type="number"
         name="OilAfter"
         label="收车油量"
         placeholder="请填写收车油量"
+        @blur="OilEnd"
+        :rules="[{ required: true, message: '请填写收车油量' }]"
       />
       <van-field
         colon
@@ -107,21 +113,21 @@
         type="textarea"
         placeholder="请填写过路费备注信息"
       />
-      <van-field
+      <!-- <van-field
         colon
         v-model="form.parkingFee"
         type="number"
         name="parkingFee"
         label="停车费"
         placeholder="请填写停车费"
-      />
+      /> -->
       <!-- <van-field
         colon
         v-model="form.driverFee"
         name="driverFee"
         label="司机费用"
       /> -->
-      <van-cell center title="交通罚款">
+      <!-- <van-cell center title="交通罚款">
         <template #right-icon>
           <van-switch @change="changeIsChecked" v-model="isChecked" size="24" />
         </template>
@@ -129,7 +135,6 @@
       <template v-if="isChecked">
         <div v-for="(item, index) in trafficTickets" :key="index">
           <van-cell-group>
-            <!-- 允许输入数字，调起带符号的纯数字键盘 -->
             <van-field
               v-model="item.fee"
               type="number"
@@ -176,7 +181,7 @@
             show-word-limit
           />
         </van-cell-group>
-      </template>
+      </template> -->
       <van-field
         colon
         v-model="form.otherFee"
@@ -194,10 +199,18 @@
       />
       <van-cell>
         <template #title>
-          <span class="totalFee-title">费用总计 :</span>
+          <span class="totalFee-title"
+            >费用总计 :<span class="totalFee" v-if="isChecked">{{
+              totalFee
+            }}</span></span
+          >
         </template>
         <template>
-          <span class="totalFee">￥{{ totalFee }}</span>
+          <van-switch
+            v-model="isChecked"
+            @input="countFee"
+            :disabled="isDisabled"
+          />
         </template>
       </van-cell>
       <div class="OtherInfo">
@@ -223,7 +236,13 @@
 <script>
 var dayjs = require('dayjs')
 import { BASE_COMNAME } from '@/global/config'
-import { assignReturnCarBySelf, queryMileage } from '@/api/assign'
+import {
+  assignReturnCarBySelf,
+  assignSubDrivingCarTakeBack,
+  assignCarTakeBack,
+  queryMileage,
+  countReturnFee,
+} from '@/api/assign'
 
 export default {
   name: 'returnCar',
@@ -231,12 +250,12 @@ export default {
   props: {},
   data() {
     return {
-      KilometersAll:'',
+      KilometersAll: '',
+      basicFee: '', // 基础费用
       form: {
         // carID: '桂AA19L0 (自营)', // 车牌号码
         endTime: '', // 还车时间
         // totalDays: '2', // 使用时长
-        // basicFee: '', // 基础费用
         KilometersAfter: '', // 收车里程
         KilometersBefore: '', // 出车里程
         // KilometersAll: '', // 行驶里程（总里程）
@@ -249,57 +268,77 @@ export default {
         remark: '', // 其它信息
       },
       isShowDateTime: false,
-      isChecked: false, // 交通罚款
+      isChecked: false, // 是否计算总价
       trafficTickets: [{ fee: '' }], // 交通罚款
-      trafficNum: 1, // 交通罚款数量
+      trafficNum: 0, // 交通罚款数量
       trafficTicketTotal: 0.0, // 交通罚款总金额
-      trafficTicketRemark: '', // 交通罚款备注
+      trafficTicketRemark: '交通罚款备注', // 交通罚款备注
       // minDate: new Date(2020, 0, 1),
       // maxDate: new Date(2025, 10, 1),
       currentDate: new Date(),
+      totalFee: '', // 费用总计
+      dateFormat: '', // 日期格式化
+      timeFormat: '', // 时间格式化
+      isDisabled: true, // 是否禁用
     }
   },
   computed: {
     currentOrder() {
       return this.$store.getters['order/currentOrder']
     },
-    // 计算总价
-    totalFee() {
-      // 哪一个价格有值，就相加
-      let totalFee = 0.0
-      if (this.form.orderTotalPrice) {
-        totalFee += parseFloat(this.form.orderTotalPrice)
-      }
-      if (this.form.roadFee) {
-        totalFee += parseFloat(this.form.roadFee)
-      }
-      if (this.form.parkingFee) {
-        totalFee += parseFloat(this.form.parkingFee)
-      }
-      if (this.form.otherFee) {
-        totalFee += parseFloat(this.form.otherFee)
-      }
-      if (this.trafficTicketTotal) {
-        totalFee += parseFloat(this.trafficTicketTotal)
-      }
-      return totalFee
-    },
+    // // 计算总价
+    // totalFee() {
+    //   // 哪一个价格有值，就相加
+    //   let totalFee = 0.0
+    //   if (this.form.orderTotalPrice) {
+    //     totalFee += parseFloat(this.form.orderTotalPrice)
+    //   }
+    //   if (this.form.roadFee) {
+    //     totalFee += parseFloat(this.form.roadFee)
+    //   }
+    //   if (this.form.parkingFee) {
+    //     totalFee += parseFloat(this.form.parkingFee)
+    //   }
+    //   if (this.form.otherFee) {
+    //     totalFee += parseFloat(this.form.otherFee)
+    //   }
+    //   if (this.trafficTicketTotal) {
+    //     totalFee += parseFloat(this.trafficTicketTotal)
+    //   }
+    //   return totalFee
+    // },
   },
   watch: {},
   created() {
     this.form = this.currentOrder
     this.form.endTime =
       this.currentOrder.CARUSETIMEEND + ' ' + this.currentOrder.orderEndTime
+    this.form.endTime = dayjs(this.form.endTime).format('YYYY-MM-DD HH:mm')
+    // 拆分日期和时间
+    let date = this.form.endTime.split(' ')[0] // 日期 2019-01-01
+    let time = this.form.endTime.split(' ')[1] // 时间 12:00
+    // 格式化日期和时间为 yyyymmdd 和hhmmss
+    this.dateFormat = date.replace(/-/g, '')
+    this.timeFormat = time.replace(/:/g, '') + '00'
+    // 初始化时,赋值基础费用
+    this.basicFee = this.currentOrder.orderTotalPrice
   },
   mounted() {},
   methods: {
     datetimeConfirm(e) {
-      let time = dayjs(e).format('YYYY-MM-DD HH:mm')
-      console.log(time)
-      this.form.endTime = time
+      let etime = dayjs(e).format('YYYY-MM-DD HH:mm')
+      // 拆分日期和时间
+      let date = etime.split(' ')[0] // 日期 2019-01-01
+      let time = etime.split(' ')[1] // 时间 12:00
+      // 格式化日期和时间为 yyyymmdd 和hhmmss
+      this.dateFormat = date.replace(/-/g, '')
+      this.timeFormat = time.replace(/:/g, '') + '00'
+
+      console.log(etime)
+      this.form.endTime = etime
       // 根据选择的时间计算相隔天数
       let startDay = dayjs(this.currentOrder.CARUSETIMEBEGIN)
-      let endDay = dayjs(time)
+      let endDay = dayjs(etime)
       let startTime = this.currentOrder.orderStartTime
       let endTime = dayjs(e).format('HH:mm:ss')
       let diff = endDay.diff(startDay, 'day')
@@ -307,7 +346,7 @@ export default {
       let diffDays = 0
       if (diff > 0) {
         if (startTime < endTime) {
-          diffDays = diff + 1
+          diff = diff + 1
         }
         diffDays = diff
       } else {
@@ -361,17 +400,20 @@ export default {
         billNo: this.currentOrder.billNo,
         saleCmpName: BASE_COMNAME,
         cardID: values.carNumber,
+        driver: this.currentOrder.retDriver
+          ? this.currentOrder.retDriver
+          : this.currentOrder.subDriver,
         returnDate: dateFormat,
         returnTime: timeFormat,
         endIndex: values.OilAfter.toString(), // 油量
         endMileage: values.KilometersAfter.toString(), // 行驶里程
-        roadTollNum: values.useDays,
-        roadTollAmt: values.roadFee.toString(), // 过路费
-        roadTollRemark: '过路费备注信息',
+        roadTollNum: '1',
+        roadTollAmt: values.roadFee ? values.roadFee.toString() : '0', // 过路费
+        roadTollRemark: values.roadTollRemark,
         trafficTicketNum: this.trafficNum.toString(),
         trafficTicketAmt: this.trafficTicketTotal.toString(),
         trafficTicketRemark: this.trafficTicketRemark, // 交通罚款备注信息
-        otherFee: values.otherFee.toString(), // 其他费用
+        otherFee: values.otherFee ? values.otherFee.toString() : '0', // 其他费用
         otherFeesRemark: values.otherFeesRemark, // 其他费用备注信息
         remark: values.remark, // 其它信息
       }
@@ -388,7 +430,14 @@ export default {
             this.currentOrder.carReturnMode === '自行还车'
           ) {
             this.loadAssignReturnCarBySelf(params)
+          } else if (
+            this.currentOrder.orderDriveType === '自驾' &&
+            this.currentOrder.carReturnMode === '上门服务'
+          ) {
+            params.miniProcNameForEngine = '租车单位签收还车'
+            this.loadAssignReturnCarByService(params)
           } else {
+            params.miniProcNameForEngine = '代驾还车'
             this.loadAssignReturnCar(params)
           }
         })
@@ -407,17 +456,28 @@ export default {
         }
       })
     },
-    // loadAssignReturnCar(params) {
-    //   assignReturnCar(params).then(res => {
-    //     console.log('指派上门收车人员', res)
-    //     if (res.data.rs === '1') {
-    //       this.$toast.success('还车成功')
-    //       this.$router.go(-1)
-    //     } else {
-    //       this.$toast.fail(res.data.rs)
-    //     }
-    //   })
-    // },
+    loadAssignReturnCar(params) {
+      assignSubDrivingCarTakeBack(params).then(res => {
+        console.log('代驾还车', res)
+        if (res.data.rs === '1') {
+          this.$toast.success('还车成功')
+          this.$router.go(-1)
+        } else {
+          this.$toast.fail(res.data.rs)
+        }
+      })
+    },
+    loadAssignReturnCarByService(params) {
+      assignCarTakeBack(params).then(res => {
+        console.log('租车单位上门服务', res)
+        if (res.data.rs === '1') {
+          this.$toast.success('还车成功')
+          this.$router.go(-1)
+        } else {
+          this.$toast.fail(res.data.rs)
+        }
+      })
+    },
     changeIsChecked(e) {
       if (e === false) {
         this.trafficTickets = [{ fee: '' }]
@@ -426,21 +486,13 @@ export default {
       }
     },
     countKm() {
-      //{
-      // "rs": "1",
-      // "queryMileage_totalRecNum": 1,
-      // "queryMileage": [
-      // {
-      // "drivingFee": "199.80",
-      // "beginMileage": "1000",
-      // "endMileage": "1111",
-      // "billNo": "14752203021457481132",
-      // "priceAfterDiscount": "1.80",
-      // "mileage": "111"
-      // }
-      // ]
-      // }
-      // event.preventDefault()
+      // 判断必填项是否为空
+      console.log(this.form.KilometersAfter, this.form.OilAfter)
+      if (!this.form.OilAfter || !this.form.KilometersAfter) {
+        this.isDisabled = true
+      } else {
+        this.isDisabled = false
+      }
       queryMileage({
         billNo: this.currentOrder.billNo,
         endMileage: this.form.KilometersAfter,
@@ -450,6 +502,16 @@ export default {
           this.KilometersAll = res.data.queryMileage[0].mileage
         }
       })
+    },
+    OilEnd() {
+      // 判断必填项是否为空
+      console.log(this.form.KilometersAfter, this.form.OilAfter)
+
+      if (!this.form.OilAfter || !this.form.KilometersAfter) {
+        this.isDisabled = true
+      } else {
+        this.isDisabled = false
+      }
     },
     addItem() {
       this.trafficTickets.push({
@@ -463,14 +525,36 @@ export default {
       this.feeAdding()
       console.log(this.trafficTickets, '删除')
     },
-    feeAdding() {
-      // 全部罚单费用相加
-      let sum = 0
-      this.trafficTickets.forEach(item => {
-        sum += Number(item.fee)
-      })
-      this.trafficTicketTotal = sum
-      console.log('sum', sum)
+    // feeAdding() {
+    //   // 全部罚单费用相加
+    //   let sum = 0
+    //   this.trafficTickets.forEach(item => {
+    //     sum += Number(item.fee)
+    //   })
+    //   this.trafficTicketTotal = sum
+    //   console.log('sum', sum)
+    // },
+    // 计算基础费用和总费用
+    countFee(checked) {
+      if (checked) {
+        countReturnFee({
+          billNo: this.currentOrder.billNo,
+          returnDate: this.dateFormat,
+          returnTime: this.timeFormat,
+          endIndex: this.form.OilAfter,
+          endMileage: this.form.KilometersAfter,
+          roadTollAmt: this.form.roadFee ? this.form.roadFee : '0',
+          otherFee: this.form.otherFee ? this.form.otherFee : '0',
+        }).then(res => {
+          if (res.data.rs !== '1') {
+            this.$toast.fail(res.data.rs)
+            return false
+          }
+          console.log(res.data.countReturnFee)
+          this.basicFee = res.data.countReturnFee[0].carRentalFee
+          this.totalFee = `￥${res.data.countReturnFee[0].billTollAmt}`
+        })
+      }
     },
   },
 }

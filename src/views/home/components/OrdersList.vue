@@ -20,7 +20,9 @@
                   <span class="orderTopText">{{
                     item.transDate + ' ' + item.transTime
                   }}</span>
-                  <span class="orderTopText">{{ item.orderStatusShow }}</span>
+                  <span class="orderTopText">{{
+                    item.tradeStatus === '2' ? '已取消' : item.orderStatusShow
+                  }}</span>
                 </div>
                 <div class="orderInfo">
                   <p>用车单位 : {{ item.purchaseCompanyName }}</p>
@@ -61,11 +63,11 @@
                   </p>
                 </div>
 
-                <div class="orderBtn">
+                <div class="orderBtn allBtn" v-if="item.tradeStatus !== '2'">
                   <van-popover
                     v-model="showPopover[index]"
                     trigger="click"
-                    placement="top-start"
+                    placement="top-end"
                     :actions="actions"
                     @select="onSelect"
                     v-if="item.orderStatusShow !== '已还车'"
@@ -81,10 +83,7 @@
                     </template>
                   </van-popover>
 
-                  <div
-                    class="orderBtn"
-                    v-if="item.orderStatusShow === '未提车'"
-                  >
+                  <div class="orderBtn">
                     <van-button
                       type="info"
                       size="small"
@@ -105,10 +104,7 @@
                       type="info"
                       size="small"
                       @click="toReturnCar(item)"
-                      v-if="
-                        item.orderStatusShow === '上门收车中' ||
-                        item.orderStatusShow === '已提车'
-                      "
+                      v-if="isReturnCar(item)"
                       >还车/计算费用</van-button
                     >
                     <van-button
@@ -117,6 +113,13 @@
                       @click="carDelivered(item)"
                       v-if="item.orderStatusShow === '上门送车中'"
                       >已送达</van-button
+                    >
+                    <van-button
+                      type="info"
+                      size="small"
+                      @click="enterViolation(item)"
+                      v-if="item.orderStatusShow === '已还车'"
+                      >录入违章信息</van-button
                     >
                   </div>
                 </div>
@@ -193,23 +196,33 @@ export default {
     assignInfo(item) {
       // 初始化 防止覆盖
       this.actions = [{ text: '司机：未指派' }, { text: '车辆：未指派' }]
-      if (item.delDriver !== '' || item.subDriver !== '') {
-        this.actions[0].text = `已指派司机：${
-          item.delDriver ? item.delDriver : item.subDriver
-        }`
+      let showdriver = ''
+      if (
+        item.delDriver !== '' ||
+        item.subDriver !== '' ||
+        item.retDriver !== ''
+      ) {
+        if (item.subDriver) {
+          showdriver = `${item.subDriver}(代驾)`
+        } else if (item.delDriver) {
+          showdriver = `${item.delDriver}(送车)`
+        } else if (item.retDriver && item.orderStatusShow === '上门收车中') {
+          showdriver = `${item.retDriver}(收车)`
+        }
+        this.actions[0].text = `司机：${showdriver}`
       } else {
         if (
           item.orderDriveType === '自驾' &&
           item.carPickUpMode === '自行取车' &&
           item.carReturnMode === '自行还车'
         ) {
-          this.actions[0].text = '司机：不需要'
+          this.actions[0].text = '自驾自取自还'
         } else {
           this.actions[0].text = '司机：未指派'
         }
       }
       if (item.orderStatusShow !== '未提车') {
-        this.actions[1].text = `已指派车辆：${item.carNumber}`
+        this.actions[1].text = `车辆：${item.carNumber}`
       } else {
         this.actions[1].text = `车辆：未指派`
       }
@@ -244,6 +257,32 @@ export default {
         } else {
           return false
         }
+      }
+    },
+    // 显示还车按钮
+    isReturnCar(item) {
+      if (item.orderDriveType === '代驾' && item.orderStatusShow === '已提车') {
+        return true
+      } else if (
+        item.orderDriveType === '自驾' &&
+        item.carReturnMode === '上门服务'
+      ) {
+        if (item.orderStatusShow === '上门收车中') {
+          return true
+        } else {
+          return false
+        }
+      } else if (
+        item.orderDriveType === '自驾' &&
+        item.carReturnMode === '自行还车'
+      ) {
+        if (item.orderStatusShow === '已提车') {
+          return true
+        } else {
+          return false
+        }
+      } else {
+        return false
       }
     },
     onLoad() {
@@ -343,6 +382,11 @@ export default {
         .catch(() => {
           // on cancel
         })
+    },
+    enterViolation(item) {
+      console.log('enterViolation', item)
+      this.$store.commit('order/setCurrentOrder', item)
+      this.$router.push('/violation')
     },
     loadAllOrder() {
       getAllOrder({

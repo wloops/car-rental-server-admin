@@ -96,11 +96,38 @@ export const assignReturnCarBySelf = params => {
   })
 }
 
+// (代驾还车)ZCbtnSubDrivingCarTakeBack
+export const assignSubDrivingCarTakeBack = data => {
+  return request({
+    method: 'post',
+    url: '/insertReturn/ZCbtnSubDrivingCarTakeBack',
+    data,
+  })
+}
+
+// (上门收回了车辆)ZCbtnCarTakeBack
+export const assignCarTakeBack = data => {
+  return request({
+    method: 'post',
+    url: '/insertReturn/ZCbtnCarTakeBack',
+    data,
+  })
+}
+
 // (还车时查询行驶里程)queryMileage
 export const queryMileage = params => {
   return request({
     method: 'get',
     url: '/search/queryMileage',
+    params,
+  })
+}
+
+// (计算还车费用)countReturnFee
+export const countReturnFee = params => {
+  return request({
+    method: 'get',
+    url: '/search/countReturnFee',
     params,
   })
 }

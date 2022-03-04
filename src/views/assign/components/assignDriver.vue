@@ -174,7 +174,8 @@ export default {
           // 逻辑判断
           if (
             this.currentOrder.orderDriveType === '自驾' &&
-            this.currentOrder.carPickUpMode === '送车上门'
+            this.currentOrder.carPickUpMode === '送车上门' &&
+            this.currentOrder.delDriver === ''
           ) {
             params.miniProcNameForEngine = '安排上门送车-只指派代驾员'
             params.personStatus = '3'
