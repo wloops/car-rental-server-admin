@@ -391,14 +391,14 @@ export default {
       // 格式化日期和时间为 yyyymmdd 和hhmmss
       let dateFormat = date.replace(/-/g, '')
       let timeFormat = time.replace(/:/g, '') + '00'
-
+      let base_comname = window.localStorage.getItem('REALUSERNAME')
       let params = {
         srlIDForEngine: 'Splenwise微信预约点餐系统',
         busiNameForEngine: '汽车租赁业务',
         busiFunNameForEngine: '租车单位还车',
         miniProcNameForEngine: '租车单位自还车',
         billNo: this.currentOrder.billNo,
-        saleCmpName: BASE_COMNAME,
+        saleCmpName: base_comname,
         cardID: values.carNumber,
         driver: this.currentOrder.retDriver
           ? this.currentOrder.retDriver

@@ -12,41 +12,41 @@
 // 开发环境: development
 // 生成环境: production
 // 测试环境: test
-let storage = window.localStorage
-let param = decodeURI(location.search)
-let appid = ''
-let code = ''
-let REALTERMTYPE = ''
-let REALUSERNAME = ''
-if (param.indexOf('appid') != -1) {
-  let params = param.split('&')
-  params.forEach((item, index, err) => {
-    if (item.indexOf('appid') != -1) {
-      appid = item.substring(item.indexOf('=') + 1)
-    }
-    if (item.indexOf('REALTERMTYPE') != -1) {
-      REALTERMTYPE = item.substring(item.indexOf('=') + 1)
-    }
-    if (item.indexOf('REALUSERNAME') != -1) {
-      REALUSERNAME = item.substring(item.indexOf('=') + 1)
-    }
-    if (item.indexOf('code') != -1) {
-      code = item.substring(item.indexOf('=') + 1)
-    }
-  })
-  storage.setItem('appid', appid)
+// let storage = window.localStorage
+// let param = decodeURI(location.search)
+// let appid = ''
+// let code = ''
+// let REALTERMTYPE = ''
+// let REALUSERNAME = ''
+// if (param.indexOf('appid') != -1) {
+//   let params = param.split('&')
+//   params.forEach((item, index, err) => {
+//     if (item.indexOf('appid') != -1) {
+//       appid = item.substring(item.indexOf('=') + 1)
+//     }
+//     if (item.indexOf('REALTERMTYPE') != -1) {
+//       REALTERMTYPE = item.substring(item.indexOf('=') + 1)
+//     }
+//     if (item.indexOf('REALUSERNAME') != -1) {
+//       REALUSERNAME = item.substring(item.indexOf('=') + 1)
+//     }
+//     if (item.indexOf('code') != -1) {
+//       code = item.substring(item.indexOf('=') + 1)
+//     }
+//   })
+//   storage.setItem('appid', appid)
 
-  console.log('appid::' + appid)
-  console.log('code::' + code)
-  console.log('REALTERMTYPE::' + REALTERMTYPE)
-  console.log('REALUSERNAME::' + REALUSERNAME)
+//   console.log('appid::' + appid)
+//   console.log('code::' + code)
+//   console.log('REALTERMTYPE::' + REALTERMTYPE)
+//   console.log('REALUSERNAME::' + REALUSERNAME)
 
-  storage.setItem('REALUSERNAME', REALUSERNAME)
-}
+//   // storage.setItem('REALUSERNAME', REALUSERNAME)
+// }
 
 let BASE_URL = ''
 let BASE_DOMAIN = ''
-let BASE_COMNAME = window.localStorage.getItem('REALUSERNAME')
+// let BASE_COMNAME = window.localStorage.getItem('REALUSERNAME')
 const TIME_OUT = 10000
 
 console.log('process.env.NODE_ENV', process.env.NODE_ENV)
@@ -65,4 +65,4 @@ if (process.env.NODE_ENV === 'development') {
   // BASE_COMNAME = '广州睿颢软件技术有限公司'
 }
 
-export { BASE_URL, BASE_DOMAIN, BASE_COMNAME, TIME_OUT }
+export { BASE_URL, BASE_DOMAIN, TIME_OUT }

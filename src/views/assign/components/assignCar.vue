@@ -43,10 +43,18 @@
       </van-popup>
       <van-field
         v-model="form.KilometersBefore"
+        required
         name="KilometersBefore"
         label="公里数"
+        :rules="[{ required: true, message: '请填写公里数' }]"
       />
-      <van-field v-model="form.OilBefore" name="OilBefore" label="油量" />
+      <van-field
+        v-model="form.OilBefore"
+        required
+        name="OilBefore"
+        label="油量"
+        :rules="[{ required: true, message: '请填写油量' }]"
+      />
       <div class="otherInfo">
         <h4>其它信息</h4>
         <van-field

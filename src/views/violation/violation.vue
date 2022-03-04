@@ -154,4 +154,8 @@ export default {
 }
 </script>
 
-<style scoped lang="less"></style>
+<style scoped lang="less">
+/deep/ .feeInput .van-button {
+  margin-right: 0.2rem;
+}
+</style>

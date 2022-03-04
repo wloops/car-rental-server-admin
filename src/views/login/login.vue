@@ -154,7 +154,7 @@ export default {
   data() {
     return {
       loginType: true, // 登录类型,true为账号登录，false为手机验证码登录
-      username: 'zcdwAdmin1',
+      username: '',
       password: '',
       tel: '',
       sms: '',
