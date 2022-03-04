@@ -7,25 +7,23 @@ module.exports = {
   publicPath: './',
   devServer: {
     // public: '192.1.2.110:4399',
-    css: {
-      loaderOptions: {
-        less: {
-          // 若 less-loader 版本小于 6.0，请移除 lessOptions 这一级，直接配置选项。
-          // lessOptions: {
-          modifyVars: {
-            // 直接覆盖变量
-            // '@skeleton-row-height': '5rem',
-            // 或者可以通过 less 文件覆盖（文件路径为绝对路径）
-            // hack: `true; @import "your-less-file-path.less";`,
-            hack: 'true; @import "/src/assets/style/myvant.less"',
-          },
-          // },
+    // hot: true,
+    // disableHostCheck: true,
+  },
+  css: {
+    loaderOptions: {
+      less: {
+        // 若 less-loader 版本小于 6.0，请移除 lessOptions 这一级，直接配置选项。
+        // lessOptions: {
+        modifyVars: {
+          // 直接覆盖变量
+          // '@skeleton-row-height': '5rem',
+          // 或者可以通过 less 文件覆盖（文件路径为绝对路径）
+          // hack: `true; @import "your-less-file-path.less";`,
+          hack: 'true; @import "/src/assets/style/myvant.less"',
         },
+        // },
       },
     },
-
-    // hot: true,
-
-    // disableHostCheck: true,
   },
 }
