@@ -101,13 +101,7 @@ export default {
       },
       showCarID: false,
       showDriver: false,
-      carIDs: [
-        '桂LR5281 (自营)',
-        '桂LSR005 (自营)',
-        '桂AA19L0 (自营)',
-        '桂L4N835 (挂靠)',
-        '粤H73K11 (挂靠)',
-      ],
+      carIDs: [],
     }
   },
   computed: {

@@ -83,28 +83,7 @@ export default {
       },
       showCarID: false,
       showDriver: false,
-      drivers: [
-        {
-          text: '张三',
-          phone: '15888888888',
-        },
-        {
-          text: '李四',
-          phone: '15999999999',
-        },
-        {
-          text: '王五',
-          phone: '15777777777',
-        },
-        {
-          text: '赵六',
-          phone: '15666666666',
-        },
-        {
-          text: '钱七',
-          phone: '15555555555',
-        },
-      ],
+      drivers: [],
     }
   },
   computed: {
