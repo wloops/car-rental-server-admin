@@ -228,22 +228,23 @@ export default {
       getSmsCode({
         _csrf: this.token,
         mobile: this.tel,
-      }).then(res => {
-        //请求成功
-        var result = res.data.rs
-        if (result == '1') {
-          this.showBg = false
-          this.Timmer()
-          this.$toast.fail('验证码发送成功,请注意查收')
-        } else {
-          Toast.fail(result)
-          return false
-        }
       })
-      .catch(err => {
-        //请求失败
-        console.log('error:' + err)
-      })
+        .then(res => {
+          //请求成功
+          var result = res.data.rs
+          if (result == '1') {
+            this.showBg = false
+            this.Timmer()
+            this.$toast.fail('验证码发送成功,请注意查收')
+          } else {
+            Toast.fail(result)
+            return false
+          }
+        })
+        .catch(err => {
+          //请求失败
+          console.log('error:' + err)
+        })
       // this.$http
       //   .post(
       //     'http://www.paytunnel.cn/carRentalServerRH/insertReturn/genAuthCodeForMobile?_csrf=' +
@@ -303,41 +304,46 @@ export default {
       }).then(res => {
         console.log('res', res)
         //请求成功
-          var result = res.data.rs
-          that.dataLoading = false
-          if (result == '1') {
-            console.log('验证码登录成功', res.data)
-            let storage = window.localStorage
-            var userName = res.data.memberID
-            var nickName = res.data.TELLERNAME
-            global_.userName = userName
-            global_.nickName = nickName
-            global_.TELLERCOMPANY = res.data.TELLERCOMPANY
-            global_.TELLERROLE = res.data.TELLERROLE
-            global_.token = res.data.token.token
-            /* --当刷新页面导致token不存在时,使用sessionStorage中的token--*/
-            // storage.setItem('token', global_.token)
-            // storage.setItem('memberID', global_.userName)
-            // storage.setItem('TELLERROLE', res.data.TELLERROLE)
-            storage.setItem('userAdmin', JSON.stringify(res.data))
-            storage.setItem('adminNickName', nickName)
-            // storage.setItem('TELLERCOMPANY1', res.data.TELLERCOMPANY)
+        var result = res.data.rs
+        that.dataLoading = false
+        if (result == '1') {
+          console.log('验证码登录成功', res.data)
+          let storage = window.localStorage
+          var userName = res.data.memberID
+          var nickName = res.data.TELLERNAME
+          global_.userName = userName
+          global_.nickName = nickName
+          global_.TELLERCOMPANY = res.data.TELLERCOMPANY
+          global_.TELLERROLE = res.data.TELLERROLE
+          global_.token = res.data.token.token
+          /* --当刷新页面导致token不存在时,使用sessionStorage中的token--*/
+          // storage.setItem('token', global_.token)
+          // storage.setItem('memberID', global_.userName)
+          // storage.setItem('TELLERROLE', res.data.TELLERROLE)
+          storage.setItem('userAdmin', JSON.stringify(res.data))
+          storage.setItem('adminNickName', nickName)
+          // storage.setItem('TELLERCOMPANY1', res.data.TELLERCOMPANY)
 
-            storage.setItem('adminMemberID', res.data.memberID)
-            // 用户权限
-            storage.setItem('userRole', res.data.TELLERROLE)
-            // window.location.href = global_.clientUrl
-            // 登录成功，返回首页
-            that.$router.push({
-              path: '/',
-            })
-          } else {
-            this.$dialog.alert({
+          storage.setItem('adminMemberID', res.data.memberID)
+          // 用户权限
+          storage.setItem('userRole', res.data.TELLERROLE)
+
+          storage.setItem('token', response.data.token.token)
+          storage.setItem('REALUSERNAME', response.data.TELLERCOMPANY)
+          // window.location.href = global_.clientUrl
+          // 登录成功，返回首页
+          that.$router.push({
+            path: '/',
+          })
+        } else {
+          this.$dialog
+            .alert({
               message: result,
-            }).then(() => {
+            })
+            .then(() => {
               return false
             })
-          }
+        }
       })
 
       // this.$http
@@ -462,9 +468,10 @@ export default {
         cipherText: password_temp,
         tellerNo: this.username,
         appId: this.appid,
-      }).then(response => {
-        console.log('loginOfAccount res', response)
-        //请求成功
+      })
+        .then(response => {
+          console.log('loginOfAccount res', response)
+          //请求成功
           var result = response.data.rs
           console.log(result)
           console.log('login response', response)
@@ -479,6 +486,8 @@ export default {
             // global_.usernameLERCOMPANY = response.data.usernameLERCOMPANY
             // global_.usernameLERROLE = response.data.usernameLERROLE
             global_.token = response.data.token.token
+            storage.setItem('token', response.data.token.token)
+            storage.setItem('REALUSERNAME', response.data.TELLERCOMPANY)
 
             /* --当刷新页面导致token不存在时,使用sessionStorage中的token--*/
             // storage.setItem('unitToken', global_.token)
@@ -530,86 +539,86 @@ export default {
                 return false
               })
           }
-      })
-      // this.$http
-      //   .post(
-      //     'http://www.paytunnel.cn/carRentalServerRH/app/apploginByAccount?_csrf=' +
-      //       this.token +
-      //       '&cipherText=' +
-      //       password_temp +
-      //       '&tellerNo=' +
-      //       this.username +
-      //       '&appId=' +
-      //       this.appid
-      //   )
-      //   .then(function (response) {
-      //     //请求成功
-      //     var result = response.data.rs
-      //     console.log(result)
-      //     console.log('login response', response)
-      //     if (result == '1') {
-      //       console.log('账号登录成功', response.data)
-      //       let storage = window.localStorage
-      //       var userName = response.data.memberID
-      //       // var nickName = response.data.usernameLERNAME
-      //       var nickName = response.data.TELLERNAME
-      //       global_.userName = userName
-      //       global_.nickName = nickName
-      //       // global_.usernameLERCOMPANY = response.data.usernameLERCOMPANY
-      //       // global_.usernameLERROLE = response.data.usernameLERROLE
-      //       global_.token = response.data.token.token
+        })
+        // this.$http
+        //   .post(
+        //     'http://www.paytunnel.cn/carRentalServerRH/app/apploginByAccount?_csrf=' +
+        //       this.token +
+        //       '&cipherText=' +
+        //       password_temp +
+        //       '&tellerNo=' +
+        //       this.username +
+        //       '&appId=' +
+        //       this.appid
+        //   )
+        //   .then(function (response) {
+        //     //请求成功
+        //     var result = response.data.rs
+        //     console.log(result)
+        //     console.log('login response', response)
+        //     if (result == '1') {
+        //       console.log('账号登录成功', response.data)
+        //       let storage = window.localStorage
+        //       var userName = response.data.memberID
+        //       // var nickName = response.data.usernameLERNAME
+        //       var nickName = response.data.TELLERNAME
+        //       global_.userName = userName
+        //       global_.nickName = nickName
+        //       // global_.usernameLERCOMPANY = response.data.usernameLERCOMPANY
+        //       // global_.usernameLERROLE = response.data.usernameLERROLE
+        //       global_.token = response.data.token.token
 
-      //       /* --当刷新页面导致token不存在时,使用sessionStorage中的token--*/
-      //       // storage.setItem('unitToken', global_.token)
-      //       // storage.setItem('memberID', global_.userName)
-      //       // storage.setItem('usernameLERROLE', response.data.usernameLERROLE)
-      //       // storage.setItem(
-      //       //   'usernameLERCOMPANY1',
-      //       //   response.data.usernameLERCOMPANY
-      //       // )
-      //       // storage.setItem('nickName', nickName)
-      //       storage.setItem('userAdmin', JSON.stringify(response.data))
+        //       /* --当刷新页面导致token不存在时,使用sessionStorage中的token--*/
+        //       // storage.setItem('unitToken', global_.token)
+        //       // storage.setItem('memberID', global_.userName)
+        //       // storage.setItem('usernameLERROLE', response.data.usernameLERROLE)
+        //       // storage.setItem(
+        //       //   'usernameLERCOMPANY1',
+        //       //   response.data.usernameLERCOMPANY
+        //       // )
+        //       // storage.setItem('nickName', nickName)
+        //       storage.setItem('userAdmin', JSON.stringify(response.data))
 
-      //       storage.setItem('adminMemberID', userName)
-      //       storage.setItem('adminNickName', nickName)
-      //       // 用户权限
-      //       storage.setItem('userRole', response.data.TELLERROLE)
-      //       // 单位token 存储到vuex(localStorage)
-      //       // that.$store.commit('setUnitToken', response.data.token.token)
+        //       storage.setItem('adminMemberID', userName)
+        //       storage.setItem('adminNickName', nickName)
+        //       // 用户权限
+        //       storage.setItem('userRole', response.data.TELLERROLE)
+        //       // 单位token 存储到vuex(localStorage)
+        //       // that.$store.commit('setUnitToken', response.data.token.token)
 
-      //       // that.$toast.success('登录成功')
-      //       const toast = that.$toast.loading({
-      //         duration: 0, // 持续展示 toast
-      //         forbidClick: true,
-      //         message: '登录中...',
-      //       })
+        //       // that.$toast.success('登录成功')
+        //       const toast = that.$toast.loading({
+        //         duration: 0, // 持续展示 toast
+        //         forbidClick: true,
+        //         message: '登录中...',
+        //       })
 
-      //       let second = 2
-      //       const timer = setInterval(() => {
-      //         second--
-      //         if (second) {
-      //           toast.message = `登录成功,${second}秒后跳转`
-      //         } else {
-      //           clearInterval(timer)
-      //           // 手动清除 Toast
-      //           that.$toast.clear()
-      //           // 登录成功返回上一级页面
-      //           // that.$router.go(-1)
-      //           that.$router.push('/')
-      //         }
-      //       }, 1000)
+        //       let second = 2
+        //       const timer = setInterval(() => {
+        //         second--
+        //         if (second) {
+        //           toast.message = `登录成功,${second}秒后跳转`
+        //         } else {
+        //           clearInterval(timer)
+        //           // 手动清除 Toast
+        //           that.$toast.clear()
+        //           // 登录成功返回上一级页面
+        //           // that.$router.go(-1)
+        //           that.$router.push('/')
+        //         }
+        //       }, 1000)
 
-      //       // window.location.href = global_.clientUrl
-      //     } else {
-      //       that.$dialog
-      //         .alert({
-      //           message: result,
-      //         })
-      //         .then(() => {
-      //           return false
-      //         })
-      //     }
-      //   })
+        //       // window.location.href = global_.clientUrl
+        //     } else {
+        //       that.$dialog
+        //         .alert({
+        //           message: result,
+        //         })
+        //         .then(() => {
+        //           return false
+        //         })
+        //     }
+        //   })
         .catch(function (error) {
           //请求失败
           console.log('error:' + error)
