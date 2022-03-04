@@ -20,6 +20,11 @@ const routes = [
     component: () => import('@/views/return/returnCar.vue'),
   },
   {
+    path: '/violation',
+    name: 'violation',
+    component: () => import('@/views/violation/violation.vue'),
+  },
+  {
     path: '/',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route

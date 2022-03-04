@@ -59,3 +59,12 @@ export const getWaitOrderOfDriver = params => {
     params,
   })
 }
+
+// (录入违章信息)ZCbtnEnterViolationInfor
+export const enterViolation = data => {
+  return request({
+    method: 'POST',
+    url: '/insertReturn/ZCbtnEnterViolationInfor',
+    data,
+  })
+}
