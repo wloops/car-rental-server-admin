@@ -72,7 +72,7 @@ export default {
   data() {
     return {
       form: {
-        startTime: '2021-12-21',
+        startTime: '',
         carID: '',
         KilometersBefore: '',
         OilBefore: '',

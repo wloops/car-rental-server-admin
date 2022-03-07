@@ -295,6 +295,11 @@ export default {
       console.log('appid', appid)
       console.log('memberID', memberID)
       console.log('sms', this.sms)
+      const toast = this.$toast.loading({
+        duration: 0, // 持续展示 toast
+        forbidClick: true,
+        message: '登录中...',
+      })
       loginOfPhone({
         _csrf: this.token,
         appid: appid,
@@ -331,10 +336,20 @@ export default {
           storage.setItem('token', response.data.token.token)
           storage.setItem('REALUSERNAME', response.data.TELLERCOMPANY)
           // window.location.href = global_.clientUrl
-          // 登录成功，返回首页
-          that.$router.push({
-            path: '/',
-          })
+          let second = 2
+            const timer = setInterval(() => {
+              second--
+              if (second) {
+                toast.message = `登录成功,${second}秒后跳转`
+              } else {
+                clearInterval(timer)
+                // 手动清除 Toast
+                this.$toast.clear()
+                // 登录成功返回上一级页面
+                // this.$router.go(-1)
+                this.$router.push('/')
+              }
+            }, 1000)
         } else {
           this.$dialog
             .alert({
@@ -428,11 +443,6 @@ export default {
     },
 
     accountLogin() {
-      // if (this.$store.getters.getTabName !== '单位租') {
-      //   this.$toast('个人租暂未开放,敬请期待')
-      //   this.setTabName('单位租')
-      //   return false
-      // }
       if (this.username == '') {
         // Toast.fail('请输入账号')
         return false
@@ -460,59 +470,59 @@ export default {
         //   console.log("清空cookie")
         this.clearCookie()
       }
-      var that = this
       console.log(this.token)
       console.log(this.appid)
+      // 开始登录
+      const toast = this.$toast.loading({
+        duration: 0, // 持续展示 toast
+        forbidClick: true,
+        message: '登录中...',
+      })
       loginOfAccount({
         _csrf: this.token,
         cipherText: password_temp,
         tellerNo: this.username,
         appId: this.appid,
       })
-        .then(response => {
-          console.log('loginOfAccount res', response)
+        .then(res => {
+          console.log('loginOfAccount res', res)
           //请求成功
-          var result = response.data.rs
+          var result = res.data.rs
           console.log(result)
-          console.log('login response', response)
+          console.log('login res', res)
           if (result == '1') {
-            console.log('账号登录成功', response.data)
+            console.log('账号登录成功', res.data)
             let storage = window.localStorage
-            var userName = response.data.memberID
-            // var nickName = response.data.usernameLERNAME
-            var nickName = response.data.TELLERNAME
+            var userName = res.data.memberID
+            // var nickName = res.data.usernameLERNAME
+            var nickName = res.data.TELLERNAME
             global_.userName = userName
             global_.nickName = nickName
-            // global_.usernameLERCOMPANY = response.data.usernameLERCOMPANY
-            // global_.usernameLERROLE = response.data.usernameLERROLE
-            global_.token = response.data.token.token
-            storage.setItem('token', response.data.token.token)
-            storage.setItem('REALUSERNAME', response.data.TELLERCOMPANY)
+            // global_.usernameLERCOMPANY = res.data.usernameLERCOMPANY
+            // global_.usernameLERROLE = res.data.usernameLERROLE
+            global_.token = res.data.token.token
+            storage.setItem('token', res.data.token.token)
+            storage.setItem('REALUSERNAME', res.data.TELLERCOMPANY)
 
             /* --当刷新页面导致token不存在时,使用sessionStorage中的token--*/
             // storage.setItem('unitToken', global_.token)
             // storage.setItem('memberID', global_.userName)
-            // storage.setItem('usernameLERROLE', response.data.usernameLERROLE)
+            // storage.setItem('usernameLERROLE', res.data.usernameLERROLE)
             // storage.setItem(
             //   'usernameLERCOMPANY1',
-            //   response.data.usernameLERCOMPANY
+            //   res.data.usernameLERCOMPANY
             // )
             // storage.setItem('nickName', nickName)
-            storage.setItem('userAdmin', JSON.stringify(response.data))
+            storage.setItem('userAdmin', JSON.stringify(res.data))
 
             storage.setItem('adminMemberID', userName)
             storage.setItem('adminNickName', nickName)
             // 用户权限
-            storage.setItem('userRole', response.data.TELLERROLE)
+            storage.setItem('userRole', res.data.TELLERROLE)
             // 单位token 存储到vuex(localStorage)
-            // that.$store.commit('setUnitToken', response.data.token.token)
+            // this.$store.commit('setUnitToken', res.data.token.token)
 
-            // that.$toast.success('登录成功')
-            const toast = that.$toast.loading({
-              duration: 0, // 持续展示 toast
-              forbidClick: true,
-              message: '登录中...',
-            })
+            // this.$toast.success('登录成功')
 
             let second = 2
             const timer = setInterval(() => {
@@ -522,16 +532,16 @@ export default {
               } else {
                 clearInterval(timer)
                 // 手动清除 Toast
-                that.$toast.clear()
+                this.$toast.clear()
                 // 登录成功返回上一级页面
-                // that.$router.go(-1)
-                that.$router.push('/')
+                // this.$router.go(-1)
+                this.$router.push('/')
               }
             }, 1000)
 
             // window.location.href = global_.clientUrl
           } else {
-            that.$dialog
+            this.$dialog
               .alert({
                 message: result,
               })
