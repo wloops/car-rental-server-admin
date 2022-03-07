@@ -65,11 +65,11 @@
       <div class="orders">
         <div class="tabs">
           <van-tabs v-model="active" swipeable animated sticky>
-            <van-tab title="全部订单">
-              <orders-list this-tabs="全部订单" page="home"></orders-list>
+            <van-tab title="全部订单" >
+              <orders-list this-tabs="全部订单" :btn-role="isShowBtn" page="home"></orders-list>
             </van-tab>
             <van-tab title="待出车">
-              <orders-list this-tabs="待出车" page="home"></orders-list>
+              <orders-list this-tabs="待出车" :btn-role="isShowBtn" page="home"></orders-list>
             </van-tab>
           </van-tabs>
         </div>
@@ -91,7 +91,7 @@ export default {
   data() {
     return {
       active: 0,
-      adminName: '张三',
+      adminName: '',
       income: {
         // total: 0,
         today: '0', // 当日收入
@@ -100,6 +100,8 @@ export default {
       userRole: '', // 用户角色
       homeTitle: '', // 首页标题
       adminNameTitle: '', // 管理员标题
+
+      isShowBtn: false, // 是否显示按钮
     }
   },
   computed: {},
@@ -110,9 +112,11 @@ export default {
         if (newVal.indexOf('司机') > -1) {
           this.homeTitle = '惠租车司机管理平台'
           this.adminNameTitle = '司机'
+          this.isShowBtn = false
         } else {
           this.homeTitle = '租车商家管理平台'
           this.adminNameTitle = '租车管理员'
+          this.isShowBtn = true
         }
       },
       immediate: true, // 初始化时立即触发

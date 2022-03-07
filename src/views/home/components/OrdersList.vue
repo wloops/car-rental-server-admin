@@ -63,7 +63,7 @@
                   </p>
                 </div>
 
-                <div class="orderBtn allBtn" v-if="item.tradeStatus !== '2'">
+                <div class="orderBtn allBtn" v-if="btnRole === true && item.tradeStatus !== '2'">
                   <van-popover
                     v-model="showPopover[index]"
                     trigger="click"
@@ -151,6 +151,10 @@ export default {
       type: String,
       default: '全部订单',
     },
+    btnRole: {
+      type: Boolean,
+      default: false,
+    }
   },
   data() {
     return {
