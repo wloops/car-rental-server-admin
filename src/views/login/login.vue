@@ -337,26 +337,29 @@ export default {
           storage.setItem('REALUSERNAME', response.data.TELLERCOMPANY)
           // window.location.href = global_.clientUrl
           let second = 2
-            const timer = setInterval(() => {
-              second--
-              if (second) {
-                toast.message = `登录成功,${second}秒后跳转`
-              } else {
-                clearInterval(timer)
-                // 手动清除 Toast
-                this.$toast.clear()
-                // 登录成功返回上一级页面
-                // this.$router.go(-1)
-                this.$router.push('/')
-              }
-            }, 1000)
+          const timer = setInterval(() => {
+            second--
+            if (second) {
+              toast.message = `登录成功,${second}秒后跳转`
+            } else {
+              clearInterval(timer)
+              // 手动清除 Toast
+              this.$toast.clear()
+              // 登录成功返回上一级页面
+              // this.$router.go(-1)
+              this.$router.push('/')
+            }
+          }, 1000)
         } else {
+          // 手动清除 Toast
+          this.$toast.clear()
           this.$dialog
             .alert({
               message: result,
             })
             .then(() => {
-              return false
+              // 手动清除 Toast
+              this.$toast.clear()
             })
         }
       })
@@ -541,12 +544,17 @@ export default {
 
             // window.location.href = global_.clientUrl
           } else {
+            // clearInterval(timer)
+            // 手动清除 Toast
+            this.$toast.clear()
             this.$dialog
               .alert({
                 message: result,
               })
               .then(() => {
-                return false
+                // on close
+                // 手动清除 Toast
+                this.$toast.clear()
               })
           }
         })
