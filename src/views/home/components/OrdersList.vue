@@ -63,13 +63,16 @@
                   </p>
                 </div>
 
-                <div class="orderBtn allBtn" v-if="btnRole === true && item.tradeStatus !== '2'">
+                <div
+                  class="orderBtn allBtn"
+                  v-if="btnRole === true && item.tradeStatus !== '2'"
+                >
                   <van-popover
                     v-model="showPopover[index]"
                     trigger="click"
                     placement="top-end"
                     :actions="actions"
-                    @select="onSelect"
+                    @select="changeAssign"
                     v-if="item.orderStatusShow !== '已还车'"
                   >
                     <template #reference>
@@ -154,7 +157,7 @@ export default {
     btnRole: {
       type: Boolean,
       default: false,
-    }
+    },
   },
   data() {
     return {
@@ -199,7 +202,7 @@ export default {
     },
     assignInfo(item) {
       // 初始化 防止覆盖
-      this.actions = [{ text: '司机：未指派' }, { text: '车辆：未指派' }]
+      this.actions = [{ text: '司机：[去指派]' }, { text: '车辆：[去指派]' }]
       let showdriver = ''
       if (
         item.delDriver !== '' ||
@@ -213,7 +216,7 @@ export default {
         } else if (item.retDriver && item.orderStatusShow === '上门收车中') {
           showdriver = `${item.retDriver}(收车)`
         }
-        this.actions[0].text = `司机：${showdriver}`
+        this.actions[0].text = `司机：${showdriver} [点击更换]`
       } else {
         if (
           item.orderDriveType === '自驾' &&
@@ -222,13 +225,27 @@ export default {
         ) {
           this.actions[0].text = '自驾自取自还'
         } else {
-          this.actions[0].text = '司机：未指派'
+          this.actions[0].text = '司机：[去指派]'
         }
       }
       if (item.orderStatusShow !== '未提车') {
-        this.actions[1].text = `车辆：${item.carNumber}`
+        this.actions[1].text = `车辆：${item.carNumber} [点击更换]`
       } else {
-        this.actions[1].text = `车辆：未指派`
+        this.actions[1].text = `车辆：[去指派]`
+      }
+
+      // 提前存入当前订单信息
+      this.$store.commit('order/setCurrentOrder', item)
+    },
+    // 点击更改指派状态
+    changeAssign(action) {
+      console.log(action.text)
+      if (action.text.indexOf('司机') !== -1) {
+        this.$store.commit('order/setIsAssignDriver', false)
+        this.$router.push('/assign')
+      } else if (action.text.indexOf('车辆') !== -1) {
+        this.$store.commit('order/setIsAssignDriver', true)
+        this.$router.push('/assign')
       }
     },
     // 显示指派司机按钮

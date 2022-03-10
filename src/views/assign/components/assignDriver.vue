@@ -128,7 +128,7 @@ export default {
       this.$dialog
         .confirm({
           title: '提示',
-          message: '确定指派该司机吗？此操作不可撤销！',
+          message: '确定指派该司机吗？',
         })
         .then(() => {
           // on confirm

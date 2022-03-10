@@ -90,7 +90,7 @@ export default {
   data() {
     return {
       form: {
-        startTime: '2021-12-21',
+        startTime: '',
         carID: '',
         KilometersBefore: '',
         OilBefore: '',
@@ -197,7 +197,7 @@ export default {
       this.$dialog
         .confirm({
           title: '提示',
-          message: '确定出车吗？此操作不可撤销!',
+          message: '确定出车吗？',
         })
         .then(() => {
           // on confirm
