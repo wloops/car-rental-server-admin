@@ -73,7 +73,7 @@
         v-model="form.KilometersAfter"
         type="number"
         name="KilometersAfter"
-        label="收车里程"
+        label="收车里程(km)"
         placeholder="请填写收车里程"
         @blur="countKm"
         :rules="[{ required: true, message: '请填写收车里程' }]"
@@ -82,7 +82,7 @@
         colon
         v-model="KilometersAll"
         name="KilometersAll"
-        label="行驶里程"
+        label="行驶里程(km)"
         readonly
         placeholder="自动计算出车前后的行驶里程"
       />
@@ -92,7 +92,7 @@
         v-model="form.OilAfter"
         type="number"
         name="OilAfter"
-        label="收车油量"
+        label="收车油量(L)"
         placeholder="请填写收车油量"
         @blur="OilEnd"
         :rules="[{ required: true, message: '请填写收车油量' }]"
@@ -252,6 +252,7 @@ export default {
     return {
       KilometersAll: '',
       basicFee: '', // 基础费用
+      days: '', // 订单天数
       form: {
         // carID: '桂AA19L0 (自营)', // 车牌号码
         endTime: '', // 还车时间
@@ -311,6 +312,7 @@ export default {
   watch: {},
   created() {
     this.form = this.currentOrder
+    this.days = Number(this.currentOrder.useDays)
     this.form.endTime =
       this.currentOrder.CARUSETIMEEND + ' ' + this.currentOrder.orderEndTime
     this.form.endTime = dayjs(this.form.endTime).format('YYYY-MM-DD HH:mm')
@@ -353,6 +355,8 @@ export default {
         diffDays = 1
       }
       this.form.useDays = diffDays
+      // 计算基础费用
+      this.countBasicFee(diffDays)
 
       this.isShowDateTime = false
     },
@@ -499,7 +503,14 @@ export default {
       }).then(res => {
         console.log('查询行驶里程', res)
         if (res.data.rs === '1') {
-          this.KilometersAll = res.data.queryMileage[0].mileage
+          let mileage = Number(res.data.queryMileage[0].mileage)
+          if (mileage > 0) {
+            this.KilometersAll = res.data.queryMileage[0].mileage
+          } else {
+            this.$toast.fail(
+              `结束里程须大于开始的${this.form.KilometersAfter - mileage}km`
+            )
+          }
         }
       })
     },
@@ -555,6 +566,12 @@ export default {
           this.totalFee = `￥${res.data.countReturnFee[0].billTollAmt}`
         })
       }
+    },
+    // 选择还车时间计算基础费用
+    countBasicFee(diffDays) {
+      // 每天价格
+      let unitPrice = Number(this.currentOrder.orderTotalPrice) / this.days
+      this.basicFee = unitPrice * diffDays
     },
   },
 }
