@@ -61,10 +61,19 @@ export const getWaitOrderOfDriver = params => {
 }
 
 // (录入违章信息)ZCbtnEnterViolationInfor
-export const enterViolation = data => {
+export const inputViolation = data => {
   return request({
     method: 'POST',
     url: '/insertReturn/ZCbtnEnterViolationInfor',
     data,
+  })
+}
+
+// (违章记录)queryMyCarViolation
+export const getViolation = params => {
+  return request({
+    method: 'GET',
+    url: '/search/queryMyCarViolation',
+    params,
   })
 }

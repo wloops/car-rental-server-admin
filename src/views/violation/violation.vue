@@ -5,92 +5,53 @@
         fixed
         placeholder
         left-text="主页"
-        title="录入违章信息"
+        title="违章信息"
         left-arrow
         color="#000"
         @click-left="onClickLeft"
       />
     </div>
+    <h4>已录入的违章信息</h4>
     <div class="content">
-      <van-form @submit="onSubmit">
-        <van-cell center title="交通罚款">
-          <!-- <template #right-icon>
-          <van-switch @change="changeIsChecked" v-model="isChecked" size="24" />
-        </template> -->
-        </van-cell>
-        <!-- <template v-if="isChecked"> -->
-        <template>
-          <div v-for="(item, index) in trafficTickets" :key="index">
-            <van-cell-group>
-              <van-field
-                v-model="item.fee"
-                type="number"
-                :label="'罚单金额' + (index + 1)"
-                clearable
-                placeholder="请输入罚单金额"
-                :rules="[{ required: true, message: '请填写当前罚单金额' }]"
-                @blur="feeAdding"
-              >
-                <template #button>
-                  <div class="feeInput">
-                    <van-button
-                      size="small"
-                      icon="plus"
-                      round
-                      type="info"
-                      v-if="index + 1 == trafficTickets.length"
-                      native-type="button"
-                      @click="addItem"
-                    ></van-button>
-                    <van-button
-                      size="small"
-                      icon="minus"
-                      round
-                      type="info"
-                      v-if="index !== 0"
-                      native-type="button"
-                      @click="removeItem(item, index)"
-                    ></van-button>
-                  </div>
-                </template>
-              </van-field>
-            </van-cell-group>
-          </div>
-          <van-cell-group>
-            <van-field
-              v-model="trafficTicketRemark"
-              rows="2"
-              autosize
-              label="罚单备注"
-              type="textarea"
-              maxlength="50"
-              placeholder="请输入罚单备注"
-              show-word-limit
-            />
-          </van-cell-group>
-        </template>
-        <div style="margin: 16px">
-          <van-button round block type="info" native-type="submit"
-            >提交</van-button
-          >
-        </div>
-      </van-form>
+      <van-collapse v-model="activeName" accordion v-if="show">
+        <van-collapse-item title="违章记录" name="1">
+          <!-- 显示违章金额以及备注信息 -->
+          <h5>违章总数：{{ trafficTickets.prdNum }}</h5>
+          <h5>合计金额：￥{{ trafficTickets.totalAmtAfterDiscount }}</h5>
+          <h5>违章备注：{{ trafficTickets.remark }}</h5>
+        </van-collapse-item>
+        <!-- <van-collapse-item title="违章记录2" name="2">
+          <h5>金额：￥200</h5>
+          <h5>备注：违章记录2</h5>
+        </van-collapse-item>
+        <van-collapse-item title="违章记录3" name="3">
+          <h5>金额：￥200</h5>
+          <h5>备注：违章记录3</h5>
+        </van-collapse-item> -->
+      </van-collapse>
+      <p style="text-align: center;" v-else>{{ showText }}</p>
     </div>
+    <div style="height: 3rem"></div>
+    <footer>
+      <van-button round type="info" native-type="button" @click="toViolation">
+        录入新的违章信息
+      </van-button>
+    </footer>
   </div>
 </template>
 
 <script>
-import { enterViolation } from '@/api/order'
+import { getViolation } from '@/api/order'
 export default {
   name: 'enterViolation',
   components: {},
   props: {},
   data() {
     return {
-      trafficTickets: [{ fee: '' }], // 交通罚款
-      trafficNum: 1, // 交通罚款数量
-      trafficTicketTotal: 0.0, // 交通罚款总金额
-      trafficTicketRemark: '', // 交通罚款备注
+      activeName: '1',
+      trafficTickets: {}, // 交通罚款
+      show: false,
+      showText: '', // 显示的文本
     }
   },
   computed: {
@@ -99,63 +60,52 @@ export default {
     },
   },
   watch: {},
-  created() {},
+  created() {
+    this.loadViolation()
+  },
   mounted() {},
   methods: {
+    toViolation() {
+      this.$router.push('/inputViolation')
+    },
     onClickLeft() {
-      this.$router.push('/')
+      this.$router.go(-1)
     },
-    addItem() {
-      this.trafficTickets.push({
-        fee: '',
+    loadViolation() {
+      getViolation({
+        billNo: this.currentOrder.billNo,
+      }).then(res => {
+        if (res.data.rs === '1') {
+          if (res.data.queryMyCarViolation_totalRecNum !== 0) {
+            this.trafficTickets = res.data.queryMyCarViolation[0]
+            this.show = true
+            console.log(this.trafficTickets, '违章信息')
+          } else {
+            this.show = false
+            this.showText = '暂无违章信息,请点击下方按钮录入'
+          }
+        }
       })
-      this.trafficNum++
-    },
-    removeItem(item, index) {
-      this.trafficNum--
-      this.trafficTickets.splice(index, 1)
-      this.feeAdding()
-      console.log(this.trafficTickets, '删除')
-    },
-    feeAdding() {
-      // 全部罚单费用相加
-      let sum = 0
-      this.trafficTickets.forEach(item => {
-        sum += Number(item.fee)
-      })
-      this.trafficTicketTotal = sum
-      console.log('sum', sum)
-    },
-    onSubmit(values) {
-      console.log(values)
-      this.$dialog
-        .confirm({
-          title: '提示',
-          message: '确定录入吗？',
-        })
-        .then(() => {
-          enterViolation({
-            billNo: this.currentOrder.billNo,
-            trafficTicketNum: this.trafficNum,
-            trafficTicketAmt: this.trafficTicketTotal,
-            trafficTicketRemark: this.trafficTicketRemark,
-          }).then(res => {
-            console.log(res)
-            if (res.data.rs === '1') {
-              this.$toast('录入成功')
-              this.$router.push('/')
-            } else {
-              this.$toast.fail(res.data.rs)
-            }
-          })
-        })
     },
   },
 }
 </script>
 
 <style scoped lang="less">
-/deep/ .feeInput .van-button {
-  margin-right: 0.2rem;
+h4 {
+  color: #000;
+  margin: 1rem;
+}
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  margin-bottom: 1.5rem;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
