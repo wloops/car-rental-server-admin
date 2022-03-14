@@ -82,6 +82,7 @@ import {
   assignSubstituteCar,
   assignCarOfSelf,
   assignCarDeliveryCar,
+  replaceAssignCar,
 } from '@/api/assign'
 export default {
   name: 'assignCar',
@@ -185,6 +186,18 @@ export default {
         this.$router.go(-1)
       })
     },
+    // 替换指派车辆
+    loadReplaceAssignCar(params) {
+      replaceAssignCar(params).then(res => {
+        console.log('替换指派车辆', res)
+        if (res.data.rs !== '1') {
+          this.$toast.fail(res.data.rs)
+          return false
+        }
+        this.$toast.success('替换指派车辆成功')
+        this.$router.go(-1)
+      })
+    },
     // 提交表单
     onSubmit(values) {
       // 判断是否送车上门,是否有送门上次人员(delDriver),有则继续
@@ -222,25 +235,33 @@ export default {
             beginIndex: values.OilBefore,
             beginMileage: values.KilometersBefore,
           }
-          if (
-            this.currentOrder.orderDriveType === '自驾' &&
-            this.currentOrder.carPickUpMode === '自行取车'
-          ) {
-            // 调用租车单位自行提车
-            params.miniProcNameForEngine = '租车单位自提车'
-            this.loadAssignCarOfSelf(params)
-          } else if (
-            this.currentOrder.orderDriveType === '自驾' &&
-            this.currentOrder.carPickUpMode === '送车上门'
-          ) {
-            // 调用租车单位送车上门
-            params.miniProcNameForEngine = '安排上门送车-不安排上门送车人员'
-            params.personStatus = '3'
-            params.status = '3'
-            this.loadAssignCarDeliveryCar(params)
+          if (this.currentOrder.carNumber === '') {
+            if (
+              this.currentOrder.orderDriveType === '自驾' &&
+              this.currentOrder.carPickUpMode === '自行取车'
+            ) {
+              // 调用租车单位自行提车
+              params.miniProcNameForEngine = '租车单位自提车'
+              this.loadAssignCarOfSelf(params)
+            } else if (
+              this.currentOrder.orderDriveType === '自驾' &&
+              this.currentOrder.carPickUpMode === '送车上门'
+            ) {
+              // 调用租车单位送车上门
+              params.miniProcNameForEngine = '安排上门送车-不安排上门送车人员'
+              params.personStatus = '3'
+              params.status = '3'
+              this.loadAssignCarDeliveryCar(params)
+            } else {
+              // params.miniProcNameForEngine = '安排代驾-安排代驾员'
+              this.loadAssignSubstituteCar(params)
+            }
           } else {
-            // params.miniProcNameForEngine = '安排代驾-安排代驾员'
-            this.loadAssignSubstituteCar(params)
+            // 更换车辆
+            params.busiFunNameForEngine = '更改订单驾驶员或车辆信息'
+            params.miniProcNameForEngine = '更改订单车辆'
+            params.carNumber = this.currentOrder.carNumber
+            this.loadReplaceAssignCar(params)
           }
         })
         .catch(() => {
