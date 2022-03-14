@@ -131,3 +131,30 @@ export const countReturnFee = params => {
     params,
   })
 }
+
+// (更改代驾司机)ZCbtnChangeSubstituteDriver
+export const replaceSubDriver = data => {
+  return request({
+    method: 'post',
+    url: '/insertReturn/ZCbtnChangeSubstituteDriver',
+    data,
+  })
+}
+
+// (更改上门收车人员)ZCbtnChangeCarCollectDriver
+export const replaceRetDriver = data => {
+  return request({
+    method: 'post',
+    url: '/insertReturn/ZCbtnChangeCarCollectDriver',
+    data,
+  })
+}
+
+// (更改上门送车人员)ZCbtnChangeCarDeliveryCar
+export const replaceDelDriver = data => {
+  return request({
+    method: 'post',
+    url: '/insertReturn/ZCbtnChangeCarDeliveryCar',
+    data,
+  })
+}

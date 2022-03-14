@@ -64,6 +64,9 @@ import {
   assignSubstituteDriver,
   assignCarDeliveryDriver,
   assignCarCollectDriver,
+  replaceSubDriver,
+  replaceRetDriver,
+  replaceDelDriver,
 } from '@/api/assign'
 export default {
   name: 'assignCar',
@@ -93,6 +96,7 @@ export default {
   },
   watch: {},
   created() {
+    console.log('指派司机', this.currentOrder)
     this.form.billNo = this.currentOrder.billNo
     this.loadAvailableDriver()
   },
@@ -153,23 +157,46 @@ export default {
           // 逻辑判断
           if (
             this.currentOrder.orderDriveType === '自驾' &&
-            this.currentOrder.carPickUpMode === '送车上门' &&
-            this.currentOrder.delDriver === ''
+            this.currentOrder.carPickUpMode === '送车上门'
           ) {
-            params.miniProcNameForEngine = '安排上门送车-只指派代驾员'
-            params.personStatus = '3'
-            params.status = '3'
-            this.loadAssignCarDeliveryDriver(params)
+            if (this.currentOrder.delDriver === '') {
+              params.miniProcNameForEngine = '安排上门送车-只指派代驾员'
+              params.personStatus = '3'
+              params.status = '3'
+              this.loadAssignCarDeliveryDriver(params)
+            } else {
+              // 更换上门送车人员
+              params.busiFunNameForEngine = '更改订单驾驶员或车辆信息'
+              params.miniProcNameForEngine = '更改订单驾驶员-上门送车员'
+              params.delDriver = this.currentOrder.delDriver
+              this.loadReplaceDelDriver(params)
+            }
           } else if (
             this.currentOrder.orderDriveType === '自驾' &&
             this.currentOrder.carReturnMode === '上门服务'
           ) {
-            params.miniProcNameForEngine = '安排上门收车'
-            params.busiFunNameForEngine = '租车单位还车'
-            this.loadAssignCarCollectDriver(params)
+            if (this.currentOrder.retDriver === '') {
+              params.miniProcNameForEngine = '安排上门收车'
+              params.busiFunNameForEngine = '租车单位还车'
+              this.loadAssignCarCollectDriver(params)
+            } else {
+              // 更换上门收车人员
+              params.busiFunNameForEngine = '更改订单驾驶员或车辆信息'
+              params.miniProcNameForEngine = '更改订单驾驶员-上门收车员'
+              params.retDriver = this.currentOrder.retDriver
+              this.loadReplaceRetDriver(params)
+            }
           } else {
-            // 指派代驾司机
-            this.loadAssignSubstituteDriver(params)
+            if (this.currentOrder.subDriver === '') {
+              // 指派代驾司机
+              this.loadAssignSubstituteDriver(params)
+            } else {
+              // 更换代驾司机
+              params.busiFunNameForEngine = '更改订单驾驶员或车辆信息'
+              params.miniProcNameForEngine = '更改订单驾驶员-代驾'
+              params.subDriver = this.currentOrder.subDriver
+              this.loadReplaceSubDriver(params)
+            }
           }
         })
         .catch(() => {
@@ -189,6 +216,19 @@ export default {
         }
       })
     },
+    // 更换代驾司机
+    loadReplaceSubDriver(params) {
+      replaceSubDriver(params).then(res => {
+        console.log('指派代驾司机', res)
+        if (res.data.rs !== '1') {
+          this.$toast(res.data.rs)
+          return false
+        } else {
+          this.$toast.success('更换司机成功')
+          this.$router.go(-1)
+        }
+      })
+    },
     // 指派上门送车人员
     loadAssignCarDeliveryDriver(params) {
       assignCarDeliveryDriver(params).then(res => {
@@ -202,6 +242,19 @@ export default {
         }
       })
     },
+    // 更换上门送车人员
+    loadReplaceDelDriver(params) {
+      replaceDelDriver(params).then(res => {
+        console.log('更换上门送车人员', res)
+        if (res.data.rs !== '1') {
+          this.$toast(res.data.rs)
+          return false
+        } else {
+          this.$toast.success('更换司机成功')
+          this.$router.go(-1)
+        }
+      })
+    },
     // 指派上门收车人员
     loadAssignCarCollectDriver(params) {
       assignCarCollectDriver(params).then(res => {
@@ -211,6 +264,19 @@ export default {
           return false
         } else {
           this.$toast.success('指派司机成功')
+          this.$router.go(-1)
+        }
+      })
+    },
+    // 更换上门收车人员
+    loadReplaceRetDriver(params) {
+      replaceRetDriver(params).then(res => {
+        console.log('更换上门收车人员', res)
+        if (res.data.rs !== '1') {
+          this.$toast(res.data.rs)
+          return false
+        } else {
+          this.$toast.success('更换司机成功')
           this.$router.go(-1)
         }
       })

@@ -211,10 +211,19 @@ export default {
       ) {
         if (item.subDriver) {
           showdriver = `${item.subDriver}(代驾)`
-        } else if (item.delDriver) {
-          showdriver = `${item.delDriver}(送车)`
-        } else if (item.retDriver && item.orderStatusShow === '上门收车中') {
-          showdriver = `${item.retDriver}(收车)`
+        } else if (item.delDriver && item.retDriver) {
+          if (item.orderStatusShow === '上门收车中') {
+            showdriver = `${item.retDriver}(收车)`
+          } else {
+            showdriver = `${item.delDriver}(送车)`
+          }
+        } else {
+          if (item.delDriver) {
+            showdriver = `${item.delDriver}(送车)`
+          }
+          if (item.retDriver) {
+            showdriver = `${item.retDriver}(收车)`
+          }
         }
         this.actions[0].text = `司机：${showdriver} [点击更换]`
       } else {
