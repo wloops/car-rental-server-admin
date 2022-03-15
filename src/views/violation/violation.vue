@@ -19,20 +19,26 @@
           <h5>违章总数：{{ trafficTickets.prdNum }}</h5>
           <h5>合计金额：￥{{ trafficTickets.totalAmtAfterDiscount }}</h5>
           <h5>违章备注：{{ trafficTickets.remark }}</h5>
+          <!-- <div class="violationImg">
+            <h5>罚单照片：</h5>
+            <div class="imgs">
+              <van-grid :border="false" :column-num="3">
+                <van-grid-item
+                  v-for="(item, index) in imgs"
+                  :key="index"
+                  @click="imgPreview(index)"
+                >
+                  <van-image :src="item" />
+                </van-grid-item>
+              </van-grid>
+            </div>
+          </div> -->
         </van-collapse-item>
-        <!-- <van-collapse-item title="违章记录2" name="2">
-          <h5>金额：￥200</h5>
-          <h5>备注：违章记录2</h5>
-        </van-collapse-item>
-        <van-collapse-item title="违章记录3" name="3">
-          <h5>金额：￥200</h5>
-          <h5>备注：违章记录3</h5>
-        </van-collapse-item> -->
       </van-collapse>
-      <p style="text-align: center;" v-else>{{ showText }}</p>
+      <p style="text-align: center" v-else>{{ showText }}</p>
     </div>
     <div style="height: 3rem"></div>
-    <footer>
+    <footer v-if="!show">
       <van-button round type="info" native-type="button" @click="toViolation">
         录入新的违章信息
       </van-button>
@@ -42,6 +48,8 @@
 
 <script>
 import { getViolation } from '@/api/order'
+
+import { ImagePreview } from 'vant'
 export default {
   name: 'enterViolation',
   components: {},
@@ -52,6 +60,10 @@ export default {
       trafficTickets: {}, // 交通罚款
       show: false,
       showText: '', // 显示的文本
+      imgs: [
+        'https://img01.yzcdn.cn/vant/apple-1.jpg',
+        'https://img01.yzcdn.cn/vant/apple-2.jpg',
+      ], // 罚单照片
     }
   },
   computed: {
@@ -85,6 +97,13 @@ export default {
             this.showText = '暂无违章信息,请点击下方按钮录入'
           }
         }
+      })
+    },
+    imgPreview(index) {
+      // 点击预览大图
+      ImagePreview({
+        images: this.imgs,
+        startPosition: index,
       })
     },
   },
