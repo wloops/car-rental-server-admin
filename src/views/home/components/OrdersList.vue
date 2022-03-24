@@ -254,10 +254,28 @@ export default {
       console.log(action.text)
       if (action.text.indexOf('司机') !== -1) {
         this.$store.commit('order/setIsAssignDriver', false)
+        // 进入指派界面(更改)
+        // if (this.$route.params.toPath === 'assign') {
+        this.$router.push({
+          name: 'assign',
+          params: {
+            action: 'change',
+          },
+        })
+        // } else {
+        //   // 登录成功返回上一级页面
+        //   this.$router.go(-1)
+        // }
         this.$router.push('/assign')
       } else if (action.text.indexOf('车辆') !== -1) {
         this.$store.commit('order/setIsAssignDriver', true)
-        this.$router.push('/assign')
+        // this.$router.push('/assign')
+        this.$router.push({
+          name: 'assign',
+          params: {
+            action: 'change',
+          },
+        })
       }
     },
     // 显示指派司机按钮

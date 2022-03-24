@@ -87,6 +87,7 @@ export default {
       showCarID: false,
       showDriver: false,
       drivers: [],
+      action: '',
     }
   },
   computed: {
@@ -135,10 +136,12 @@ export default {
           message: '确定指派该司机吗？',
         })
         .then(() => {
+          if (this.$route.params.action === 'change') {
+            this.action = 'change'
+          }
+          console.log('this.action', this.action)
           // on confirm
           console.log('submit', values)
-          // console.log(this.currentOrder)
-          // this.$store.commit('order/setIsAssignDriver', true)
           let params = {
             srlIDForEngine: 'Splenwise微信预约点餐系统',
             busiNameForEngine: '汽车租赁业务',
@@ -155,47 +158,61 @@ export default {
             driver: values.name,
           }
           // 逻辑判断
-          if (
-            this.currentOrder.orderDriveType === '自驾' &&
-            this.currentOrder.carPickUpMode === '送车上门'
-          ) {
-            if (this.currentOrder.delDriver === '') {
-              params.miniProcNameForEngine = '安排上门送车-只指派代驾员'
-              params.personStatus = '3'
-              params.status = '3'
-              this.loadAssignCarDeliveryDriver(params)
-            } else {
+          if (this.action === 'change') {
+            // 更换司机服务
+            if (
+              this.currentOrder.orderDriveType === '自驾' &&
+              this.currentOrder.carPickUpMode === '送车上门' &&
+              this.currentOrder.retDriver === ''
+            ) {
               // 更换上门送车人员
+              console.log('更换上门送车人员')
               params.busiFunNameForEngine = '更改订单驾驶员或车辆信息'
               params.miniProcNameForEngine = '更改订单驾驶员-上门送车员'
               params.delDriver = this.currentOrder.delDriver
               this.loadReplaceDelDriver(params)
-            }
-          } else if (
-            this.currentOrder.orderDriveType === '自驾' &&
-            this.currentOrder.carReturnMode === '上门服务'
-          ) {
-            if (this.currentOrder.retDriver === '') {
-              params.miniProcNameForEngine = '安排上门收车'
-              params.busiFunNameForEngine = '租车单位还车'
-              this.loadAssignCarCollectDriver(params)
-            } else {
+            } else if (
+              this.currentOrder.orderDriveType === '自驾' &&
+              this.currentOrder.carReturnMode === '上门服务'
+            ) {
               // 更换上门收车人员
+              console.log('更换上门收车人员')
               params.busiFunNameForEngine = '更改订单驾驶员或车辆信息'
               params.miniProcNameForEngine = '更改订单驾驶员-上门收车员'
               params.retDriver = this.currentOrder.retDriver
               this.loadReplaceRetDriver(params)
-            }
-          } else {
-            if (this.currentOrder.subDriver === '') {
-              // 指派代驾司机
-              this.loadAssignSubstituteDriver(params)
             } else {
               // 更换代驾司机
+              console.log('更换代驾司机')
               params.busiFunNameForEngine = '更改订单驾驶员或车辆信息'
               params.miniProcNameForEngine = '更改订单驾驶员-代驾'
               params.subDriver = this.currentOrder.subDriver
               this.loadReplaceSubDriver(params)
+            }
+          } else {
+            // 指派司机服务
+            if (
+              this.currentOrder.orderDriveType === '自驾' &&
+              this.currentOrder.carPickUpMode === '送车上门' &&
+              this.currentOrder.delDriver === ''
+            ) {
+              params.miniProcNameForEngine = '安排上门送车-只指派代驾员'
+              params.personStatus = '3'
+              params.status = '3'
+              this.loadAssignCarDeliveryDriver(params)
+            } else if (
+              this.currentOrder.orderDriveType === '自驾' &&
+              this.currentOrder.carReturnMode === '上门服务' &&
+              this.currentOrder.retDriver === ''
+            ) {
+              params.miniProcNameForEngine = '安排上门收车'
+              params.busiFunNameForEngine = '租车单位还车'
+              this.loadAssignCarCollectDriver(params)
+            } else {
+              if (this.currentOrder.subDriver === '') {
+                // 指派代驾司机
+                this.loadAssignSubstituteDriver(params)
+              }
             }
           }
         })
