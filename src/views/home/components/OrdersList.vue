@@ -6,6 +6,8 @@
           v-model="loading"
           :finished="finished"
           finished-text="没有更多了"
+          :error.sync="error"
+          error-text="请求失败，点击重新加载"
           @load="onLoad"
         >
           <van-grid :gutter="15" :column-num="1">
@@ -163,6 +165,7 @@ export default {
     return {
       list: [],
       returnList: [],
+      error: false,
       loading: false,
       finished: false,
       refreshing: false,
@@ -316,6 +319,7 @@ export default {
       }
     },
     onLoad() {
+      console.log('onload')
       // 异步更新数据
       // setTimeout 仅做示例，真实场景中一般为 ajax 请求
       // this.loading = true
@@ -434,7 +438,10 @@ export default {
           this.finished =
             this.orderList.length >= res.data.queryCarMercAllOrders_totalRecNum
         } else {
-          // this.$toast(res.data.rs)
+          console.log(res.data.rs)
+          this.loading = false
+          this.error = true
+          this.pageNum = 0
         }
       })
     },
@@ -453,7 +460,10 @@ export default {
           this.finished =
             this.orderList.length >= res.data.queryDriverAllOrders_totalRecNum
         } else {
-          // this.$toast(res.data.rs)
+          console.log(res.data.rs)
+          this.loading = false
+          this.error = true
+          this.pageNum = 0
         }
       })
     },
@@ -475,7 +485,10 @@ export default {
             this.orderList.length >=
             res.data.queryCarMercNotTrainOrders_totalRecNum
         } else {
-          // this.$toast(res.data.rs)
+          console.log(res.data.rs)
+          this.loading = false
+          this.error = true
+          this.pageNum = 0
         }
       })
     },
@@ -497,7 +510,10 @@ export default {
             this.orderList.length >=
             res.data.queryDriverNotTrainOrders_totalRecNum
         } else {
-          // this.$toast(res.data.rs)
+          console.log(res.data.rs)
+          this.loading = false
+          this.error = true
+          this.pageNum = 0
         }
       })
     },

@@ -56,8 +56,13 @@ if (process.env.NODE_ENV === 'development') {
   BASE_DOMAIN = 'http://www.paytunnel.cn'
   // BASE_COMNAME = '广州睿颢软件技术有限公司'
 } else if (process.env.NODE_ENV === 'production') {
+  // 测试环境
   BASE_URL = 'http://www.paytunnel.cn/carRentalServerRH'
   BASE_DOMAIN = 'http://www.paytunnel.cn'
+  // 生产环境
+  // BASE_URL = ''
+  // BASE_DOMAIN = ''
+
   // BASE_COMNAME = '广州睿颢软件技术有限公司'
 } else {
   BASE_URL = 'http://www.paytunnel.cn/carRentalServerRH'

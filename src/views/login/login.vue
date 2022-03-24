@@ -193,6 +193,7 @@ export default {
       ],
       phonePattern: /^(?:(?:\+|00)86)?1[3-9]\d{9}$/,
       smsPattern: /^\d{4}$/,
+      REALUSERNAME: '',
     }
   },
   computed: {
@@ -209,6 +210,7 @@ export default {
     this.show = true
     this.getCookie()
     this.getPK()
+    this.getREALUSERNAME()
   },
   mounted() {},
   methods: {
@@ -444,7 +446,40 @@ export default {
       this.setTabName('单位租')
       // this.$router.push('/companyLogin')
     },
+    getREALUSERNAME() {
+      let storage = window.localStorage
+      let param = decodeURI(location.search)
+      let appid = ''
+      let code = ''
+      let REALTERMTYPE = ''
+      let REALUSERNAME = ''
+      if (param.indexOf('appid') != -1) {
+        let params = param.split('&')
+        params.forEach((item, index, err) => {
+          if (item.indexOf('appid') != -1) {
+            appid = item.substring(item.indexOf('=') + 1)
+          }
+          if (item.indexOf('REALTERMTYPE') != -1) {
+            REALTERMTYPE = item.substring(item.indexOf('=') + 1)
+          }
+          if (item.indexOf('REALUSERNAME') != -1) {
+            REALUSERNAME = item.substring(item.indexOf('=') + 1)
+          }
+          if (item.indexOf('code') != -1) {
+            code = item.substring(item.indexOf('=') + 1)
+          }
+        })
+        storage.setItem('appid', appid)
 
+        console.log('appid::' + appid)
+        console.log('code::' + code)
+        console.log('REALTERMTYPE::' + REALTERMTYPE)
+        console.log('REALUSERNAME::' + REALUSERNAME)
+
+        this.REALUSERNAME = REALUSERNAME
+        storage.setItem('REALUSERNAME', REALUSERNAME)
+      }
+    },
     accountLogin() {
       if (this.username == '') {
         // Toast.fail('请输入账号')
@@ -486,6 +521,7 @@ export default {
         cipherText: password_temp,
         tellerNo: this.username,
         appId: this.appid,
+        REALUSERNAME: this.REALUSERNAME,
       })
         .then(res => {
           console.log('loginOfAccount res', res)
@@ -505,7 +541,7 @@ export default {
             // global_.usernameLERROLE = res.data.usernameLERROLE
             global_.token = res.data.token.token
             storage.setItem('token', res.data.token.token)
-            storage.setItem('REALUSERNAME', res.data.TELLERCOMPANY)
+            // storage.setItem('REALUSERNAME', res.data.TELLERCOMPANY)
 
             /* --当刷新页面导致token不存在时,使用sessionStorage中的token--*/
             // storage.setItem('unitToken', global_.token)

@@ -235,7 +235,7 @@
 
 <script>
 var dayjs = require('dayjs')
-import { BASE_COMNAME } from '@/global/config'
+// import { BASE_COMNAME } from '@/global/config'
 import {
   assignReturnCarBySelf,
   assignSubDrivingCarTakeBack,

@@ -55,11 +55,11 @@
               </van-field>
             </van-cell-group>
           </div>
-          <van-field name="uploader" label="罚单照片">
+          <!-- <van-field name="uploader" label="罚单照片">
             <template #input>
               <van-uploader v-model="fileList" multiple />
             </template>
-          </van-field>
+          </van-field> -->
           <van-cell-group>
             <van-field
               v-model="trafficTicketRemark"
