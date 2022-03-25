@@ -3,13 +3,13 @@
   <div class="login">
     <div class="loginBox">
       <div class="topNav">
-        <van-nav-bar title="" left-arrow @click-right="changLoginType">
-          <template #right>
+        <van-nav-bar title="" @click-right="changLoginType">
+          <!-- <template #right>
             <div class="register">
               <a v-if="loginType === true">验证码登录</a>
               <a v-if="loginType === false">账号登录</a>
             </div>
-          </template>
+          </template> -->
         </van-nav-bar>
       </div>
       <div class="logoBox">
@@ -99,17 +99,17 @@
             </div>
           </template>
 
-          <p class="unPassword" v-if="loginType === true"><a>忘记密码？</a></p>
+          <!-- <p class="unPassword" v-if="loginType === true"><a>忘记密码？</a></p> -->
           <div class="loginBtn" style="margin: 1rem" v-if="loginType === true">
-            <van-button
+            <!-- <van-button
               type="info"
               color="#ffc65f"
               native-type="button"
               @click="toRegister"
             >
               注册</van-button
-            >
-            <van-button type="info" color="#ffc65f" native-type="submit"
+            > -->
+            <van-button type="info" block color="#ffc65f" native-type="submit"
               >登录</van-button
             >
           </div>
@@ -594,85 +594,6 @@ export default {
               })
           }
         })
-        // this.$http
-        //   .post(
-        //     'http://www.paytunnel.cn/carRentalServerRH/app/apploginByAccount?_csrf=' +
-        //       this.token +
-        //       '&cipherText=' +
-        //       password_temp +
-        //       '&tellerNo=' +
-        //       this.username +
-        //       '&appId=' +
-        //       this.appid
-        //   )
-        //   .then(function (response) {
-        //     //请求成功
-        //     var result = response.data.rs
-        //     console.log(result)
-        //     console.log('login response', response)
-        //     if (result == '1') {
-        //       console.log('账号登录成功', response.data)
-        //       let storage = window.localStorage
-        //       var userName = response.data.memberID
-        //       // var nickName = response.data.usernameLERNAME
-        //       var nickName = response.data.TELLERNAME
-        //       global_.userName = userName
-        //       global_.nickName = nickName
-        //       // global_.usernameLERCOMPANY = response.data.usernameLERCOMPANY
-        //       // global_.usernameLERROLE = response.data.usernameLERROLE
-        //       global_.token = response.data.token.token
-
-        //       /* --当刷新页面导致token不存在时,使用sessionStorage中的token--*/
-        //       // storage.setItem('unitToken', global_.token)
-        //       // storage.setItem('memberID', global_.userName)
-        //       // storage.setItem('usernameLERROLE', response.data.usernameLERROLE)
-        //       // storage.setItem(
-        //       //   'usernameLERCOMPANY1',
-        //       //   response.data.usernameLERCOMPANY
-        //       // )
-        //       // storage.setItem('nickName', nickName)
-        //       storage.setItem('userAdmin', JSON.stringify(response.data))
-
-        //       storage.setItem('adminMemberID', userName)
-        //       storage.setItem('adminNickName', nickName)
-        //       // 用户权限
-        //       storage.setItem('userRole', response.data.TELLERROLE)
-        //       // 单位token 存储到vuex(localStorage)
-        //       // that.$store.commit('setUnitToken', response.data.token.token)
-
-        //       // that.$toast.success('登录成功')
-        //       const toast = that.$toast.loading({
-        //         duration: 0, // 持续展示 toast
-        //         forbidClick: true,
-        //         message: '登录中...',
-        //       })
-
-        //       let second = 2
-        //       const timer = setInterval(() => {
-        //         second--
-        //         if (second) {
-        //           toast.message = `登录成功,${second}秒后跳转`
-        //         } else {
-        //           clearInterval(timer)
-        //           // 手动清除 Toast
-        //           that.$toast.clear()
-        //           // 登录成功返回上一级页面
-        //           // that.$router.go(-1)
-        //           that.$router.push('/')
-        //         }
-        //       }, 1000)
-
-        //       // window.location.href = global_.clientUrl
-        //     } else {
-        //       that.$dialog
-        //         .alert({
-        //           message: result,
-        //         })
-        //         .then(() => {
-        //           return false
-        //         })
-        //     }
-        //   })
         .catch(function (error) {
           //请求失败
           console.log('error:' + error)
@@ -742,10 +663,10 @@ export default {
 .loginBtn {
   align-items: center;
   justify-content: space-between;
-  .van-button--info {
-    width: 45%;
-    margin: 0.5rem;
-  }
+  // .van-button--info {
+  //   width: 45%;
+  //   margin: 0.5rem;
+  // }
 }
 .unPassword {
   font-size: 0.9rem;

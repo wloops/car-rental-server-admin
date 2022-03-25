@@ -171,7 +171,7 @@ export default {
       refreshing: false,
       orderList: [],
       pageNum: 0,
-      pageSize: 10,
+      pageSize: 9,
       totalNum: 0,
 
       showPopover: [], // 是否显示当前气泡弹窗
@@ -180,11 +180,10 @@ export default {
     }
   },
   computed: {
-    // 是否指派司机
-    isAssignDriver() {},
-
-    // 显示指派车辆按钮
-    assignCarBtn() {},
+    // // 是否指派司机
+    // isAssignDriver() {},
+    // // 显示指派车辆按钮
+    // assignCarBtn() {},
   },
   watch: {},
   created() {
