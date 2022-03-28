@@ -52,7 +52,7 @@ request.interceptors.request.use(
   function (config) {
     // POST传参序列化(添加请求拦截器)
 
-    if (config.method === 'post') {
+    if (config.method === 'post' && config.data) {
       // console.log('old config.data', config.data)
       // 设置请求头 发送的数据是x-www-form-urlencoded 格式
       config.headers['Content-Type'] = 'application/x-www-form-urlencoded'

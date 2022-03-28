@@ -30,9 +30,9 @@
           size="large"
           icon="balance-list"
           is-link
-          to="orders"
+          to="/"
         />
-        <van-cell title="我的违章" size="large" icon="underway" is-link />
+        <!-- <van-cell title="我的违章" size="large" icon="underway" is-link />
         <van-cell
           title="密码管理"
           size="large"
@@ -45,7 +45,7 @@
           icon="warning"
           is-link
           to="problems"
-        />
+        /> -->
       </van-cell-group>
     </div>
 

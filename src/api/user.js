@@ -15,6 +15,13 @@ export const silenceLogin = params => {
     params,
   })
 }
+// getPk
+export const getPK = () => {
+  return request({
+    method: 'POST',
+    url: '/app/getPK',
+  })
+}
 // 检查登录状态
 export const checkLogin = () => {
   return request({
