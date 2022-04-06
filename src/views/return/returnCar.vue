@@ -88,14 +88,12 @@
       />
       <van-field
         colon
-        required
         v-model="form.OilAfter"
         type="number"
         name="OilAfter"
         label="收车油量(L)"
         placeholder="请填写收车油量"
         @blur="OilEnd"
-        :rules="[{ required: true, message: '请填写收车油量' }]"
       />
       <van-field
         colon
@@ -492,7 +490,7 @@ export default {
     countKm() {
       // 判断必填项是否为空
       console.log(this.form.KilometersAfter, this.form.OilAfter)
-      if (!this.form.OilAfter || !this.form.KilometersAfter) {
+      if (!this.form.KilometersAfter) {
         this.isDisabled = true
       } else {
         this.isDisabled = false
@@ -518,7 +516,7 @@ export default {
       // 判断必填项是否为空
       console.log(this.form.KilometersAfter, this.form.OilAfter)
 
-      if (!this.form.OilAfter || !this.form.KilometersAfter) {
+      if (!this.form.KilometersAfter) {
         this.isDisabled = true
       } else {
         this.isDisabled = false
@@ -552,7 +550,7 @@ export default {
           billNo: this.currentOrder.billNo,
           returnDate: this.dateFormat,
           returnTime: this.timeFormat,
-          endIndex: this.form.OilAfter,
+          endIndex: this.form.OilAfter ? this.form.OilAfter : '0',
           endMileage: this.form.KilometersAfter,
           roadTollAmt: this.form.roadFee ? this.form.roadFee : '0',
           otherFee: this.form.otherFee ? this.form.otherFee : '0',
