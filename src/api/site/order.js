@@ -16,64 +16,47 @@ export const getIncome = params => {
   })
 }
 
-// 获取商家全部订单
+// (查询运动商家全部订单)querySportBusinessOrders
 export const getAllOrder = params => {
   return request({
     method: 'GET',
-    url: '/search/queryCarMercAllOrders',
+    url: '/search/querySportBusinessOrders',
     params,
   })
 }
 
-// 获取商家待出车订单
+// (查询运动商家已预约订单)querySportBusinessReseOrders
 export const getWaitOrder = params => {
   return request({
     method: 'GET',
-    url: '/search/queryCarMercNotTrainOrders',
-    params,
-  })
-}
-// 查询司机本月和当日收入
-export const getIncomeOfDriver = params => {
-  return request({
-    method: 'GET',
-    url: '/search/queryIncomeOfDriver',
+    url: '/search/querySportBusinessReseOrders',
     params,
   })
 }
 
-// 获取司机全部订单
-export const getAllOrderOfDriver = params => {
+// (查询运动商家已取消订单)querySportBusinessCancOrders
+export const getCancOrder = params => {
   return request({
     method: 'GET',
-    url: '/search/queryDriverAllOrders',
+    url: '/search/querySportBusinessCancOrders',
     params,
   })
 }
 
-// 获取司机待出车订单
-export const getWaitOrderOfDriver = params => {
-  return request({
-    method: 'GET',
-    url: '/search/queryDriverNotTrainOrders',
-    params,
-  })
-}
-
-// (录入违章信息)ZCbtnEnterViolationInfor
-export const inputViolation = data => {
+// (取消已付款订单)CGbtnCancelPaidOrder
+export const cancelTheOrderOfPayment = data => {
   return request({
     method: 'POST',
-    url: '/insertReturn/ZCbtnEnterViolationInfor',
+    url: '/insertReturn/CGbtnCancelPaidOrder',
     data,
   })
 }
 
-// (违章记录)queryMyCarViolation
-export const getViolation = params => {
+// (取消未付款订单)CGbtnCancelUnPaidOrder
+export const cancelTheOrderOfUnPayment = data => {
   return request({
-    method: 'GET',
-    url: '/search/queryMyCarViolation',
-    params,
+    method: 'POST',
+    url: '/insertReturn/CGbtnCancelUnPaidOrder',
+    data,
   })
 }

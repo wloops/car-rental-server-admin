@@ -23,25 +23,33 @@
                     item.transDate + ' ' + item.transTime
                   }}</span> -->
                   <span class="orderTopText">{{
-                    '2022-04-20' + ' ' + '12:40:15'
+                    item.transDate + ' ' + item.transTime
                   }}</span>
                   <!-- <span class="orderTopText">{{
                     item.tradeStatus === '2' ? '已取消' : item.orderStatusShow
                   }}</span> -->
-                  <span class="orderTopText">{{ '待使用' }}</span>
+                  <span class="orderTopText">{{ item.statusShow }}</span>
                 </div>
                 <div class="orderInfo">
-                  <p>预约场地 : {{ '天河体育中心 羽毛球场1号场' }}</p>
+                  <p>场馆名称 : {{ item.venueName }}</p>
+                  <p>预约场地 : {{ siteNameShow(item) }}</p>
                   <p>订单编号 : {{ item.billNo }}</p>
-                  <p>下单账号 :{{ '1063659' }}</p>
-                  <p>预约日期 : {{ '2022-04-20' }}</p>
-                  <p>预约时间 : {{ '10:00-11:00' }}</p>
+                  <!-- <p>下单账号 :{{ '1063659' }}</p> -->
+                  <p>预约日期 : {{ item.orderDate }}</p>
+                  <p>
+                    预约时间 :
+                    {{ orderTimeShow(item) }}
+                  </p>
                   <p>订单金额 : ￥{{ item.orderTotalPrice }}</p>
                 </div>
 
                 <div
                   class="orderBtn allBtn"
-                  v-if="btnRole === true && item.tradeStatus !== '2'"
+                  v-if="
+                    btnRole === true &&
+                    item.status !== '7' &&
+                    item.status !== '27'
+                  "
                 >
                   <!-- <van-popover
                     v-model="showPopover[index]"
@@ -69,12 +77,12 @@
                       @click="cancellationOrder(item)"
                       >取消订单</van-button
                     >
-                    <van-button
+                    <!-- <van-button
                       type="info"
                       size="small"
                       @click="confirmUseSite(item)"
                       >确认使用</van-button
-                    >
+                    > -->
                   </div>
                   <!-- <div class="orderBtn returnCar">
                     <van-button
@@ -114,11 +122,10 @@
 import {
   getAllOrder,
   getWaitOrder,
-  getAllOrderOfDriver,
-  getWaitOrderOfDriver,
-} from '@/api/order'
-
-import { assignCarRentalCollectedCar } from '@/api/assign'
+  getCancOrder,
+  cancelTheOrderOfPayment,
+  cancelTheOrderOfUnPayment,
+} from '@/api/site/order'
 
 export default {
   name: 'OrdersList',
@@ -151,12 +158,7 @@ export default {
       actions: [{ text: '司机:未指派' }, { text: '车辆:未指派' }],
     }
   },
-  computed: {
-    // // 是否指派司机
-    // isAssignDriver() {},
-    // // 显示指派车辆按钮
-    // assignCarBtn() {},
-  },
+  computed: {},
   watch: {},
   created() {
     // this.onLoad()
@@ -164,6 +166,25 @@ export default {
 
   mounted() {},
   methods: {
+    // 场地名称格式化
+    siteNameShow(item) {
+      // 去除场馆名称中的'出租'
+      let siteName = item.siteName.replace('出租', '')
+      return siteName + '-' + item.siteType
+    },
+    // 预约时间格式化
+    orderTimeShow(item) {
+      // 100000-100999 格式改为10:00-11:00
+      let orderStartTime = item.orderStartTime.replace(
+        /^(\d{2})(\d{2})(\d{2})$/,
+        '$1:$2'
+      )
+      let orderEndTime = item.orderEndTime.replace(
+        /^(\d{2})(\d{2})(\d{2})$/,
+        '$1:$2'
+      )
+      return orderStartTime + '-' + orderEndTime
+    },
     //是否显示当前气泡弹窗 js 重叠处理
     stopPropagation(e) {
       e = e || window.event
@@ -172,139 +193,6 @@ export default {
         e.stopPropagation()
       } else {
         e.cancelBubble = true //IE阻止冒泡方法
-      }
-    },
-    assignInfo(item) {
-      // 初始化 防止覆盖
-      this.actions = [{ text: '司机：[去指派]' }, { text: '车辆：[去指派]' }]
-      let showdriver = ''
-      if (
-        item.delDriver !== '' ||
-        item.subDriver !== '' ||
-        item.retDriver !== ''
-      ) {
-        if (item.subDriver) {
-          showdriver = `${item.subDriver}(代驾)`
-        } else if (item.delDriver && item.retDriver) {
-          if (item.orderStatusShow === '上门收车中') {
-            showdriver = `${item.retDriver}(收车)`
-          } else {
-            showdriver = `${item.delDriver}(送车)`
-          }
-        } else {
-          if (item.delDriver) {
-            showdriver = `${item.delDriver}(送车)`
-          }
-          if (item.retDriver) {
-            showdriver = `${item.retDriver}(收车)`
-          }
-        }
-        this.actions[0].text = `司机：${showdriver} [点击更换]`
-      } else {
-        if (
-          item.orderDriveType === '自驾' &&
-          item.carPickUpMode === '自行取车' &&
-          item.carReturnMode === '自行还车'
-        ) {
-          this.actions[0].text = '自驾自取自还'
-        } else {
-          this.actions[0].text = '司机：[去指派]'
-        }
-      }
-      if (item.orderStatusShow !== '未提车') {
-        this.actions[1].text = `车辆：${item.carNumber} [点击更换]`
-      } else {
-        this.actions[1].text = `车辆：[去指派]`
-      }
-
-      // 提前存入当前订单信息
-      this.$store.commit('order/setCurrentOrder', item)
-    },
-    // 点击更改指派状态
-    changeAssign(action) {
-      console.log(action.text)
-      if (action.text.indexOf('司机') !== -1) {
-        this.$store.commit('order/setIsAssignDriver', false)
-        // 进入指派界面(更改)
-        // if (this.$route.params.toPath === 'assign') {
-        this.$router.push({
-          name: 'assign',
-          params: {
-            action: 'change',
-          },
-        })
-        // } else {
-        //   // 登录成功返回上一级页面
-        //   this.$router.go(-1)
-        // }
-        this.$router.push('/assign')
-      } else if (action.text.indexOf('车辆') !== -1) {
-        this.$store.commit('order/setIsAssignDriver', true)
-        // this.$router.push('/assign')
-        this.$router.push({
-          name: 'assign',
-          params: {
-            action: 'change',
-          },
-        })
-      }
-    },
-    // 显示指派司机按钮
-    assignDriverBtn(item) {
-      if (item.orderDriveType === '自驾' && item.orderStatusShow === '未提车') {
-        if (item.carPickUpMode === '自行取车') {
-          return false
-        } else {
-          if (item.delDriver === '') {
-            return true
-          } else {
-            return false
-          }
-        }
-      } else if (
-        item.orderDriveType === '自驾' &&
-        item.orderStatusShow === '已提车'
-      ) {
-        if (item.carReturnMode === '自行还车') {
-          return false
-        } else {
-          return true
-        }
-      } else if (
-        item.orderDriveType === '代驾' &&
-        item.orderStatusShow === '未提车'
-      ) {
-        if (item.subDriver === '') {
-          return true
-        } else {
-          return false
-        }
-      }
-    },
-    // 显示还车按钮
-    isReturnCar(item) {
-      if (item.orderDriveType === '代驾' && item.orderStatusShow === '已提车') {
-        return true
-      } else if (
-        item.orderDriveType === '自驾' &&
-        item.carReturnMode === '上门服务'
-      ) {
-        if (item.orderStatusShow === '上门收车中') {
-          return true
-        } else {
-          return false
-        }
-      } else if (
-        item.orderDriveType === '自驾' &&
-        item.carReturnMode === '自行还车'
-      ) {
-        if (item.orderStatusShow === '已提车') {
-          return true
-        } else {
-          return false
-        }
-      } else {
-        return false
       }
     },
     onLoad() {
@@ -325,18 +213,25 @@ export default {
 
         if (this.thisTabs === '全部订单') {
           this.pageNum++
-          if (userRole.indexOf('司机') > -1) {
-            this.loadAllOrderOfDriver()
-          } else {
-            this.loadAllOrder()
-          }
-        } else if (this.thisTabs === '待出车') {
+          // if (userRole.indexOf('司机') > -1) {
+          //   this.loadAllOrderOfDriver()
+          // } else {
+          this.loadAllOrder()
+          // }
+        } else if (this.thisTabs === '已预约') {
           this.pageNum++
-          if (userRole.indexOf('司机') > -1) {
-            this.loadWaitOrderOfDriver()
-          } else {
-            this.loadWaitOrder()
-          }
+          // if (userRole.indexOf('司机') > -1) {
+          //   this.loadWaitOrderOfDriver()
+          // } else {
+          this.loadWaitOrder()
+          // }
+        } else {
+          this.pageNum++
+          // if (userRole.indexOf('司机') > -1) {
+          //   this.loadWaitOrderOfDriver()
+          // } else {
+          this.loadCancOrder()
+          // }
         }
         // // 加载状态结束
         // this.loading = false
@@ -356,98 +251,24 @@ export default {
       this.loading = true
       this.onLoad()
     },
-    toAssignCar(item) {
-      this.$store.commit('order/setIsAssignDriver', true)
-      this.$store.commit('order/setCurrentOrder', item)
-      this.$router.push('/assign')
-    },
-    toAssignDriver(item) {
-      console.log('toAssignDriver', item)
-      this.$store.commit('order/setIsAssignDriver', false)
-      this.$store.commit('order/setCurrentOrder', item)
-      this.$router.push('/assign')
-    },
-    toReturnCar(item) {
-      console.log('toReturnCar', item)
-      this.$store.commit('order/setIsAssignDriver', false)
-      this.$store.commit('order/setCurrentOrder', item)
-      this.$router.push('/return')
-    },
-    carDelivered(item) {
-      // 上门送车中,调用时改为已提车
-      console.log('carDelivered', item)
-      let params = {
-        billNo: item.billNo,
-        saleCmpName: item.saleCmpName,
-        employeeName: item.delDriver,
-        srlIDForEngine: 'Splenwise微信预约点餐系统',
-        busiNameForEngine: '汽车租赁业务',
-        busiFunNameForEngine: '出租单位派车',
-        miniProcNameForEngine: '租车单位签收送车',
-      }
-      // 询问是否确定送达
-      this.$dialog
-        .confirm({
-          title: '提示',
-          message: '确定已送达？',
-        })
-        .then(() => {
-          // on confirm
-          assignCarRentalCollectedCar(params).then(res => {
-            if (res.data.rs === '1') {
-              this.$toast.success('已送达')
-              item.orderStatusShow = '已提车'
-            } else {
-              this.$toast.fail(res.data.rs)
-            }
-          })
-        })
-        .catch(() => {
-          // on cancel
-        })
-    },
-    enterViolation(item) {
-      console.log('enterViolation', item)
-      this.$store.commit('order/setCurrentOrder', item)
-      this.$router.push('/violation')
-    },
     loadAllOrder() {
       getAllOrder({
         currentPage: this.pageNum,
         numOfPerPage: this.pageSize,
       }).then(res => {
         if (res.data.rs === '1') {
-          console.log('管理员全部订单', res)
-          console.log('管理员全部订单', res.data)
-          this.orderList = this.orderList.concat(res.data.queryCarMercAllOrders)
-          this.totalNum = res.data.queryCarMercAllOrders_totalRecNum
+          console.log('运动管理员全部订单', res)
+          console.log('运动管理员全部订单', res.data)
+          this.orderList = this.orderList.concat(
+            res.data.querySportBusinessOrders
+          )
+          this.totalNum = res.data.querySportBusinessOrders_totalRecNum
           this.list = this.orderList
           console.log('this.list', this.list)
           this.loading = false
           this.finished =
-            this.orderList.length >= res.data.queryCarMercAllOrders_totalRecNum
-        } else {
-          console.log(res.data.rs)
-          this.loading = false
-          this.error = true
-          this.pageNum = 0
-        }
-      })
-    },
-    loadAllOrderOfDriver() {
-      getAllOrderOfDriver({
-        currentPage: this.pageNum,
-        numOfPerPage: this.pageSize,
-      }).then(res => {
-        if (res.data.rs === '1') {
-          console.log('司机全部订单', res.data)
-          this.orderList = this.orderList.concat(res.data.queryDriverAllOrders)
-          this.totalNum = res.data.queryDriverAllOrders_totalRecNum
-          this.list = this.orderList
-          console.log('this.list', this.list)
-          this.loading = false
-          this.finished =
-            this.orderList.length >= res.data.queryDriverAllOrders_totalRecNum
+            this.orderList.length >=
+            res.data.querySportBusinessOrders_totalRecNum
         } else {
           console.log(res.data.rs)
           this.loading = false
@@ -462,17 +283,17 @@ export default {
         numOfPerPage: this.pageSize,
       }).then(res => {
         if (res.data.rs === '1') {
-          console.log('管理员未出行订单', res.data)
+          console.log('管理员已预约订单', res.data)
           this.orderList = this.orderList.concat(
-            res.data.queryCarMercNotTrainOrders
+            res.data.querySportBusinessReseOrders
           )
-          this.totalNum = res.data.queryCarMercNotTrainOrders_totalRecNum
+          this.totalNum = res.data.querySportBusinessReseOrders_totalRecNum
           this.list = this.orderList
           console.log('this.list', this.list)
           this.loading = false
           this.finished =
             this.orderList.length >=
-            res.data.queryCarMercNotTrainOrders_totalRecNum
+            res.data.querySportBusinessReseOrders_totalRecNum
         } else {
           console.log(res.data.rs)
           this.loading = false
@@ -481,23 +302,23 @@ export default {
         }
       })
     },
-    loadWaitOrderOfDriver() {
-      getWaitOrderOfDriver({
+    loadCancOrder() {
+      getCancOrder({
         currentPage: this.pageNum,
         numOfPerPage: this.pageSize,
       }).then(res => {
         if (res.data.rs === '1') {
-          console.log('司机未出行订单', res.data)
+          console.log('管理员已预约订单', res.data)
           this.orderList = this.orderList.concat(
-            res.data.queryDriverNotTrainOrders
+            res.data.querySportBusinessCancOrders
           )
-          this.totalNum = res.data.queryDriverNotTrainOrders_totalRecNum
+          this.totalNum = res.data.querySportBusinessCancOrders_totalRecNum
           this.list = this.orderList
           console.log('this.list', this.list)
           this.loading = false
           this.finished =
             this.orderList.length >=
-            res.data.queryDriverNotTrainOrders_totalRecNum
+            res.data.querySportBusinessCancOrders_totalRecNum
         } else {
           console.log(res.data.rs)
           this.loading = false
@@ -507,8 +328,16 @@ export default {
       })
     },
 
-    // 租场订单
+    // 取消租场订单
     cancellationOrder(item) {
+      let params = {
+        srlIDForEngine: 'Splenwise微信预约点餐系统',
+        busiNameForEngine: '运动场地出租业务',
+        busiFunNameForEngine: '线上退场',
+        miniProcNameForEngine: '完成线上退场',
+        billNo: item.billNo,
+      }
+      console.log('取消订单参数', params)
       this.$dialog
         .confirm({
           title: '提示',
@@ -516,24 +345,47 @@ export default {
         })
         .then(() => {
           // on confirm
+          // 根据支付状态判断如何取消订单
+          if (item.status === '1') {
+            // 未支付
+            params.miniProcNameForEngine = '取消未支付订单'
+            cancelTheOrderOfUnPayment(params).then(res => {
+              if (res.data.rs === '1') {
+                this.onRefresh()
+                this.$toast('取消订单成功')
+              } else {
+                this.$toast(res.data.rs)
+              }
+            })
+          } else if (item.status === '13') {
+            // 已支付
+            cancelTheOrderOfPayment(params).then(res => {
+              if (res.data.rs === '1') {
+                this.onRefresh()
+                this.$toast('取消订单成功')
+              } else {
+                this.$toast(res.data.rs)
+              }
+            })
+          }
         })
         .catch(() => {
           // on cancel
         })
     },
-    confirmUseSite(item) {
-      this.$dialog
-        .confirm({
-          title: '提示',
-          message: '确定使用？',
-        })
-        .then(() => {
-          // on confirm
-        })
-        .catch(() => {
-          // on cancel
-        })
-    },
+    // confirmUseSite(item) {
+    //   this.$dialog
+    //     .confirm({
+    //       title: '提示',
+    //       message: '确定使用？',
+    //     })
+    //     .then(() => {
+    //       // on confirm
+    //     })
+    //     .catch(() => {
+    //       // on cancel
+    //     })
+    // },
   },
 }
 </script>
