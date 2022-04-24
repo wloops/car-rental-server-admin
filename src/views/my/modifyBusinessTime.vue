@@ -50,6 +50,7 @@
 </template>
 
 <script>
+import { setSportsHallBusinessTime } from '@/api/site/my'
 export default {
   name: 'modifyBusinessTime',
   components: {},
@@ -59,7 +60,7 @@ export default {
       show: false,
       beginBusinessTimeShow: '08:00', // 开馆时间(接口返回)
       endBusinessTimeShow: '22:00', // 闭馆时间
-      currentTime: '12:00',
+      currentTime: '12:00:00',
       timeFlag: 'begin',
     }
   },
@@ -100,12 +101,12 @@ export default {
     modifyTimeValue() {
       this.show = false
       if (this.timeFlag === 'begin') {
-        this.beginBusinessTimeShow = this.currentTime
+        this.beginBusinessTimeShow = this.currentTime + ':00'
       } else {
-        this.endBusinessTimeShow = this.currentTime
+        this.endBusinessTimeShow = this.currentTime + ':00'
       }
     },
-    cancelModifyTimeValue(){
+    cancelModifyTimeValue() {
       this.show = false
     },
     confirmModify() {
@@ -118,12 +119,41 @@ export default {
         })
         .then(() => {
           // on confirm
-          this.$store.commit('setBusinessTimeSlot', {
-            beginBusinessTime: this.beginBusinessTimeShow,
-            endBusinessTime: this.endBusinessTimeShow,
+          // this.$store.commit('setBusinessTimeSlot', {
+          //   beginBusinessTime: this.beginBusinessTimeShow,
+          //   endBusinessTime: this.endBusinessTimeShow,
+          // })
+          // srlIDForEngine:Splenwise微信预约点餐系统
+          // busiNameForEngine:运动场地出租业务
+          // busiFunNameForEngine:运动场馆配置设置
+          // miniProcNameForEngine:设置运动场馆营业时间
+          // TELLERCOMPANY:广州睿颢软件技术有限公司
+          // TELLERTEAM:天河体育中心体育场
+          // startTime:090000
+          // endTime:230000
+
+          // 09:00:00时间转换为090000
+          let startTime = this.beginBusinessTimeShow.replace(/:/g, '')
+          let endTime = this.endBusinessTimeShow.replace(/:/g, '')
+          let data = {
+            srlIDForEngine: 'Splenwise微信预约点餐系统',
+            busiNameForEngine: '运动场地出租业务',
+            busiFunNameForEngine: '运动场馆配置设置',
+            miniProcNameForEngine: '设置运动场馆营业时间',
+            TELLERCOMPANY: window.localStorage.getItem('REALUSERNAME'),
+            TELLERTEAM: window.localStorage.getItem('venueName'),
+            startTime: startTime,
+            endTime: endTime,
+          }
+          console.log('修改营业时间', data)
+          setSportsHallBusinessTime(data).then(res => {
+            if (res.data.rs === '1') {
+              this.$toast.success('修改成功')
+              this.$router.push('/siteMy')
+            } else {
+              this.$toast(res.data.rs)
+            }
           })
-          this.$toast.success('修改成功')
-          this.$router.push('/siteMy')
         })
         .catch(() => {
           // on cancel

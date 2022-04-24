@@ -75,7 +75,7 @@
 </template>
 
 <script>
-// import { setLogout } from '@/api/user'
+import { getSportsHallInfo, setSportsHallStatus } from '@/api/site/my'
 export default {
   name: 'myPage',
   components: {},
@@ -111,6 +111,22 @@ export default {
   },
   methods: {
     init() {
+      // (查询运动场馆开放状态及营业时间)
+      getSportsHallInfo({
+        TELLERTEAM: window.localStorage.getItem('venueName'),
+      }).then(res => {
+        if (res.data.rs === '1') {
+          let info = {
+            beginBusinessTime: res.data.querySportsHallInfor[0].startTime,
+            endBusinessTime: res.data.querySportsHallInfor[0].endTime,
+            status: res.data.querySportsHallInfor[0].status,
+          }
+          console.log('BusinessTime', info)
+          this.$store.commit('setBusinessTimeSlot', info)
+        } else {
+          console.log(res.data.rs)
+        }
+      })
       let user = window.localStorage.getItem('adminMemberID')
       let guest = window.localStorage.getItem('guestMemberID')
       if (user) {
@@ -185,10 +201,41 @@ export default {
     openVenue(flag) {
       console.log('openVenue', flag)
       if (flag === true) {
-        this.$toast.success('场馆已开放')
+        this.setVenueStatus('1')
       } else {
-        this.$toast.success('场馆已关闭')
+        this.setVenueStatus('0')
       }
+    },
+    // (设置场馆开放状态)
+    setVenueStatus(status) {
+      // srlIDForEngine:Splenwise微信预约点餐系统
+      // busiNameForEngine:运动场地出租业务
+      // busiFunNameForEngine:运动场馆配置设置
+      // miniProcNameForEngine:设置运动场馆状态
+      // TELLERCOMPANY:广州睿颢软件技术有限公司
+      // TELLERTEAM:天河体育中心体育场
+      // status:1
+      let data = {
+        srlIDForEngine: 'Splenwise微信预约点餐系统',
+        busiNameForEngine: '运动场地出租业务',
+        busiFunNameForEngine: '运动场馆配置设置',
+        miniProcNameForEngine: '设置运动场馆状态',
+        TELLERCOMPANY: window.localStorage.getItem('REALUSERNAME'),
+        TELLERTEAM: window.localStorage.getItem('venueName'),
+        status: status,
+      }
+      setSportsHallStatus(data).then(res => {
+        if (res.data.rs === '1') {
+          if (status === '1') {
+            this.$toast.success('场馆已开放')
+          } else {
+            this.$toast.success('场馆已关闭')
+          }
+          this.init()
+        } else {
+          this.$toast.fail('设置失败')
+        }
+      })
     },
   },
 }

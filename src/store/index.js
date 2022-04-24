@@ -8,8 +8,9 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     businessTimeSlot: {
-      beginBusinessTime: '08:00',
-      endBusinessTime: '22:00',
+      beginBusinessTime: '',
+      endBusinessTime: '',
+      status: '1',
     },
   },
   getters: {

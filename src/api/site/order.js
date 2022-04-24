@@ -1,4 +1,4 @@
-// 《车辆信息请求模块》
+// 《请求模块》
 // 加载 request 模块
 import { request } from '@/utils'
 // export const hello = () => {

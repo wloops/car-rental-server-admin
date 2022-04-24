@@ -558,6 +558,8 @@ export default {
             storage.setItem('adminNickName', nickName)
             // 用户权限
             storage.setItem('userRole', res.data.TELLERROLE)
+            // 场馆名称
+            storage.setItem('venueName', res.data.TELLERTEAM)
 
             // 单位token 存储到vuex(localStorage)
             // this.$store.commit('setUnitToken', res.data.token.token)
