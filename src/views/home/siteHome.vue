@@ -66,18 +66,25 @@
         <div class="tabs">
           <van-tabs v-model="active" swipeable animated sticky>
             <van-tab title="全部订单">
-              <orders-list
+              <site-orders-list
                 this-tabs="全部订单"
                 :btn-role="isShowBtn"
                 page="home"
-              ></orders-list>
+              ></site-orders-list>
             </van-tab>
-            <van-tab title="待出车">
-              <orders-list
-                this-tabs="待出车"
+            <van-tab title="已预约">
+              <site-orders-list
+                this-tabs="已预约"
                 :btn-role="isShowBtn"
                 page="home"
-              ></orders-list>
+              ></site-orders-list>
+            </van-tab>
+            <van-tab title="已取消">
+              <site-orders-list
+                this-tabs="已取消"
+                :btn-role="isShowBtn"
+                page="home"
+              ></site-orders-list>
             </van-tab>
           </van-tabs>
         </div>
@@ -87,13 +94,14 @@
 </template>
 
 <script>
-import OrdersList from './components/OrdersList.vue'
-import { getIncome, getIncomeOfDriver } from '@/api/order'
+// import OrdersList from './components/OrdersList.vue'
+import siteOrdersList from './components/siteOrdersList.vue'
+import { getIncome } from '@/api/site/order'
 
 export default {
   name: 'home',
   components: {
-    OrdersList,
+    siteOrdersList,
   },
   props: {},
   data() {
@@ -117,13 +125,13 @@ export default {
     userRole: {
       handler(newVal, oldVal) {
         console.log('userRole', newVal)
-        if (newVal.indexOf('司机') > -1) {
-          this.homeTitle = '惠租车司机管理平台'
-          this.adminNameTitle = '司机'
-          this.isShowBtn = false
+        if (newVal.indexOf('运动场地') > -1) {
+          this.homeTitle = '惠运动商家管理平台'
+          this.adminNameTitle = '运动场馆管理员'
+          this.isShowBtn = true
         } else {
-          this.homeTitle = '租车商家管理平台'
-          this.adminNameTitle = '租车管理员'
+          this.homeTitle = '惠运动商家管理平台'
+          this.adminNameTitle = '运动场馆管理员'
           this.isShowBtn = true
         }
       },
@@ -134,9 +142,7 @@ export default {
     // this.login()
     this.userRole = window.localStorage.getItem('userRole')
     this.adminName = window.localStorage.getItem('adminNickName')
-    if (this.userRole.indexOf('司机') > -1) {
-      this.loadIncomeOfDriver()
-    } else {
+    if (this.userRole.indexOf('运动场地') > -1) {
       this.loadIncome()
     }
   },
@@ -149,20 +155,7 @@ export default {
         console.log('income:', res)
         console.log('income:', res.data)
         if (res.data.rs === '1') {
-          let income = res.data.queryIncomeOfMonthAndDay[0]
-          this.income.month = income.orderTotalPriceByMonth
-          this.income.today = income.orderTotalPriceByDay
-          console.log('this.income', this.income)
-        } else {
-          // this.$toast(res.data.rs)
-        }
-      })
-    },
-    loadIncomeOfDriver() {
-      getIncomeOfDriver().then(res => {
-        console.log('IncomeOfDriver:', res.data)
-        if (res.data.rs === '1') {
-          let income = res.data.queryIncomeOfDriver[0]
+          let income = res.data.querySportBusinessIncome[0]
           this.income.month = income.orderTotalPriceByMonth
           this.income.today = income.orderTotalPriceByDay
           console.log('this.income', this.income)

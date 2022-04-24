@@ -31,23 +31,8 @@ const routes = [
   },
   {
     path: '/',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      // import(/* webpackChunkName: "about" */ '../views/About.vue'),
-      import('@/views/layout/layout.vue'),
+    component: () => import('@/views/layout/layout.vue'),
     children: [
-      // {
-      //   path: '',
-      //   name: 'login',
-      //   component: () => import('@/views/login/login.vue'),
-      // },
-      // {
-      //   path: '',
-      //   name: 'login',
-      //   component: () => import('@/views/login/loginTest.vue'),
-      // },
       {
         path: '',
         name: 'home',
@@ -59,6 +44,27 @@ const routes = [
         component: () => import('@/views/my/my.vue'),
       },
     ],
+  },
+  {
+    path: '/site',
+    component: () => import('@/views/layout/siteLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'siteHome',
+        component: () => import('@/views/home/siteHome.vue'),
+      },
+      {
+        path: '/siteMy',
+        name: 'siteMy',
+        component: () => import('@/views/my/siteMy.vue'),
+      },
+    ],
+  },
+  {
+    path: '/modifyBusinessTime',
+    name: 'modifyBusinessTime',
+    component: () => import('@/views/my/modifyBusinessTime.vue'),
   },
 ]
 
@@ -75,6 +81,7 @@ router.beforeEach((to, from, next) => {
   // 用户登录状态信息
   const user = JSON.parse(window.localStorage.getItem('userAdmin'))
   let userID = window.localStorage.getItem('adminMemberID')
+  let userRole = window.localStorage.getItem('userRole')
   // console.log('user:', user)
   // 验证登录页面的登录状态
   if (to.path !== '/login') {
@@ -89,13 +96,13 @@ router.beforeEach((to, from, next) => {
     // 如果是登录页面 就允许通过
     next()
   }
-  // if (to.path == '/') {
-  //   if (user && userID) {
-  //     next()
-  //   } else {
-  //     next('/login')
-  //   }
-  // }
+  if (to.path == '/') {
+    if (userRole.indexOf('运动场地') > -1) {
+      next('/site')
+    } else {
+      next()
+    }
+  }
 
   // next()
 })

@@ -558,6 +558,7 @@ export default {
             storage.setItem('adminNickName', nickName)
             // 用户权限
             storage.setItem('userRole', res.data.TELLERROLE)
+
             // 单位token 存储到vuex(localStorage)
             // this.$store.commit('setUnitToken', res.data.token.token)
 
@@ -574,7 +575,12 @@ export default {
                 this.$toast.clear()
                 // 登录成功返回上一级页面
                 // this.$router.go(-1)
-                this.$router.push('/')
+                // 根据用户权限跳转到不同的首页
+                if (res.data.TELLERROLE.indexOf('运动场地') > -1) {
+                  this.$router.push('/site')
+                } else {
+                  this.$router.push('/')
+                }
               }
             }, 1000)
 

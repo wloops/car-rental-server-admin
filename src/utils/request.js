@@ -50,6 +50,13 @@ request.interceptors.request.use(
   // config 是当前请求相关的配置信息对象
   // config 是可以修改的
   function (config) {
+    // get默认携带REALUSERNAME
+    if (config.method === 'get') {
+      config.params = {
+        ...config.params,
+        REALUSERNAME: localStorage.getItem('REALUSERNAME'),
+      }
+    }
     // POST传参序列化(添加请求拦截器)
 
     if (config.method === 'post' && config.data) {
@@ -144,7 +151,7 @@ request.interceptors.response.use(
 
     // 如果rs=-1,提示msg
     if (res.data.rs === '-1') {
-      Toast('msg', res.data.msg)
+      Toast(res.data.msg)
     }
     return res
   },
