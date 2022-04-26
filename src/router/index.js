@@ -98,7 +98,13 @@ router.beforeEach((to, from, next) => {
   }
   if (to.path == '/') {
     if (userRole.indexOf('运动场地') > -1) {
-      next('/site')
+      if (user && userID) {
+        // 已登录,允许通过
+        next('/site')
+      } else {
+        // 没有登录信息,跳转到登陆页面
+        next('/login')
+      }
     } else {
       next()
     }
