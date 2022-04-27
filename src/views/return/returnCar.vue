@@ -60,6 +60,60 @@
         label="使用时长(天)"
       />
       <van-field
+        readonly
+        clickable
+        colon
+        required
+        name="drivingRange"
+        :value="drivingRange"
+        label="行驶范围"
+        placeholder="点击选择行驶范围"
+        @click="showDrivingRange"
+        :rules="[{ required: true, message: '请选择行驶范围' }]"
+      />
+      <!-- <van-calendar v-model="showCalendar" @confirm="onConfirm" /> -->
+      <van-popup
+        v-model="isShowDrivingRange"
+        position="bottom"
+        round
+        :style="{ height: '35%' }"
+      >
+        <van-picker
+          show-toolbar
+          title="选择行驶范围"
+          :columns="drivingRangeColumns"
+          :default-index="0"
+          @confirm="drivingRangeConfirm"
+        />
+      </van-popup>
+      <van-field
+        readonly
+        clickable
+        colon
+        required
+        name="driverCost"
+        :value="driverCost"
+        label="司机费用"
+        placeholder="点击选择司机费用"
+        @click="showDriverCost"
+        :rules="[{ required: true, message: '请选择司机费用' }]"
+      />
+      <!-- <van-calendar v-model="showCalendar" @confirm="onConfirm" /> -->
+      <van-popup
+        v-model="isShowDriverCost"
+        position="bottom"
+        round
+        :style="{ height: '35%' }"
+      >
+        <van-picker
+          show-toolbar
+          title="选择司机费用"
+          :columns="driverCostColumns"
+          :default-index="0"
+          @confirm="driverCostConfirm"
+        />
+      </van-popup>
+      <van-field
         colon
         readonly
         v-model="basicFee"
@@ -240,6 +294,7 @@ import {
   assignCarTakeBack,
   queryMileage,
   countReturnFee,
+  queryDriverFeeOptPrice,
 } from '@/api/assign'
 
 export default {
@@ -251,6 +306,9 @@ export default {
       KilometersAll: '',
       basicFee: '', // 基础费用
       days: '', // 订单天数
+      drivingRange: '附近乡镇', // 行驶范围
+      driverCost: '', // 司机费用
+      driverCostID: '', // 司机费用ID
       form: {
         // carID: '桂AA19L0 (自营)', // 车牌号码
         endTime: '', // 还车时间
@@ -279,6 +337,11 @@ export default {
       dateFormat: '', // 日期格式化
       timeFormat: '', // 时间格式化
       isDisabled: true, // 是否禁用
+
+      drivingRangeColumns: ['附近乡镇', '偏远乡镇'],
+      isShowDrivingRange: false,
+      driverCostColumns: [],
+      isShowDriverCost: false,
     }
   },
   computed: {
@@ -322,9 +385,27 @@ export default {
     this.timeFormat = time.replace(/:/g, '') + '00'
     // 初始化时,赋值基础费用
     this.basicFee = this.currentOrder.orderTotalPrice
+    this.queryDriverFee()
   },
   mounted() {},
   methods: {
+    // 查询司机费用
+    queryDriverFee() {
+      queryDriverFeeOptPrice().then(res => {
+        if (res.data.rs === '1') {
+          console.log('查询司机费用', res.data.queryDriverFeeOptPrice)
+          let price = res.data.queryDriverFeeOptPrice
+          this.driverCostColumns = price.map(item => {
+            return {
+              text: item.prdUnitPrc,
+              id: item.purchasePrdNo,
+            }
+          })
+        } else {
+          this.$toast(res.data.rs)
+        }
+      })
+    },
     datetimeConfirm(e) {
       let etime = dayjs(e).format('YYYY-MM-DD HH:mm')
       // 拆分日期和时间
@@ -360,6 +441,23 @@ export default {
     },
     showDateTime() {
       this.isShowDateTime = !this.isShowDateTime
+    },
+    showDrivingRange() {
+      this.isShowDrivingRange = !this.isShowDrivingRange
+    },
+    showDriverCost() {
+      this.isShowDriverCost = !this.isShowDriverCost
+    },
+    drivingRangeConfirm(e) {
+      console.log('drivingRangeConfirm', e)
+      this.drivingRange = e
+      this.isShowDrivingRange = false
+    },
+    driverCostConfirm(e) {
+      console.log('driverCostConfirm', e)
+      this.driverCost = e.text
+      this.driverCostID = e.id
+      this.isShowDriverCost = false
     },
     formatter(type, val) {
       if (type === 'year') {
@@ -418,6 +516,8 @@ export default {
         otherFee: values.otherFee ? values.otherFee.toString() : '0', // 其他费用
         otherFeesRemark: values.otherFeesRemark, // 其他费用备注信息
         remark: values.remark, // 其它信息
+        destCate: this.drivingRange,
+        purchasePrdNo: this.driverCostID,
       }
       console.log(params)
       this.$dialog
@@ -554,6 +654,8 @@ export default {
           endMileage: this.form.KilometersAfter,
           roadTollAmt: this.form.roadFee ? this.form.roadFee : '0',
           otherFee: this.form.otherFee ? this.form.otherFee : '0',
+          destCate: this.drivingRange ? this.drivingRange : '0',
+          purchasePrdNo: this.driverCostID ? this.driverCostID : '0',
         }).then(res => {
           if (res.data.rs !== '1') {
             this.$toast.fail(res.data.rs)

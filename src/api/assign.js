@@ -113,6 +113,14 @@ export const assignCarTakeBack = data => {
     data,
   })
 }
+// (查询司机费用可选价格)queryDriverFeeOptPrice
+export const queryDriverFeeOptPrice = params => {
+  return request({
+    method: 'get',
+    url: '/search/queryDriverFeeOptPrice',
+    params,
+  })
+}
 
 // (还车时查询行驶里程)queryMileage
 export const queryMileage = params => {
@@ -166,3 +174,4 @@ export const replaceAssignCar = data => {
     data,
   })
 }
+
