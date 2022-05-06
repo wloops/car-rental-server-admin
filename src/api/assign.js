@@ -121,6 +121,14 @@ export const queryDriverFeeOptPrice = params => {
     params,
   })
 }
+// (查询代驾费用可选价格)queryDrivingServiceFeeOptPrice
+export const queryReplaceDriverFeePrice = params => {
+  return request({
+    method: 'get',
+    url: '/search/queryDrivingServiceFeeOptPrice',
+    params,
+  })
+}
 
 // (还车时查询行驶里程)queryMileage
 export const queryMileage = params => {
@@ -174,4 +182,3 @@ export const replaceAssignCar = data => {
     data,
   })
 }
-

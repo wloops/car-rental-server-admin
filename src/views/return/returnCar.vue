@@ -90,27 +90,32 @@
         readonly
         clickable
         colon
-        required
-        name="driverCost"
-        :value="driverCost"
-        label="司机费用"
-        placeholder="点击选择司机费用"
-        @click="showDriverCost"
-        :rules="[{ required: true, message: '请选择司机费用' }]"
+        :required="isReplaceDriving"
+        name="replaceDrivingCost"
+        :value="replaceDrivingCost"
+        label="代驾服务费"
+        placeholder="点击选择代驾服务费"
+        @click="showReplaceDrivingCost"
+        :rules="
+          isReplaceDriving
+            ? [{ required: true, message: '请选择代驾服务费' }]
+            : ''
+        "
       />
       <!-- <van-calendar v-model="showCalendar" @confirm="onConfirm" /> -->
       <van-popup
-        v-model="isShowDriverCost"
+        v-model="isShowReplaceDrivingCost"
         position="bottom"
         round
         :style="{ height: '35%' }"
       >
         <van-picker
           show-toolbar
-          title="选择司机费用"
-          :columns="driverCostColumns"
+          title="选择代驾服务费"
+          :columns="replaceDrivingCostColumns"
           :default-index="0"
-          @confirm="driverCostConfirm"
+          @confirm="replaceDrivingCostConfirm"
+          @cancel="isShowReplaceDrivingCost = !isShowReplaceDrivingCost"
         />
       </van-popup>
       <van-field
@@ -119,7 +124,7 @@
         v-model="basicFee"
         type="number"
         name="basicFee"
-        label="基础费用"
+        label="车辆费用"
       />
       <van-field
         colon
@@ -265,6 +270,38 @@
           />
         </template>
       </van-cell>
+      <van-field
+        readonly
+        clickable
+        colon
+        :required="isReplaceDriving"
+        name="driverCost"
+        :value="driverCost"
+        label="司机劳务费"
+        placeholder="点击选择司机劳务费"
+        @click="showDriverCost"
+        :rules="
+          isReplaceDriving
+            ? [{ required: true, message: '请选择司机劳务费' }]
+            : ''
+        "
+      />
+      <!-- <van-calendar v-model="showCalendar" @confirm="onConfirm" /> -->
+      <van-popup
+        v-model="isShowDriverCost"
+        position="bottom"
+        round
+        :style="{ height: '35%' }"
+      >
+        <van-picker
+          show-toolbar
+          title="选择司机劳务费"
+          :columns="driverCostColumns"
+          :default-index="0"
+          @confirm="driverCostConfirm"
+          @cancel="isShowDriverCost = !isShowDriverCost"
+        />
+      </van-popup>
       <div class="OtherInfo">
         <h4>其它信息</h4>
       </div>
@@ -295,6 +332,7 @@ import {
   queryMileage,
   countReturnFee,
   queryDriverFeeOptPrice,
+  queryReplaceDriverFeePrice,
 } from '@/api/assign'
 
 export default {
@@ -309,6 +347,8 @@ export default {
       drivingRange: '附近乡镇', // 行驶范围
       driverCost: '', // 司机费用
       driverCostID: '', // 司机费用ID
+      replaceDrivingCost: '', // 代驾费用
+      replaceDrivingCostID: '', // 代驾费用ID
       form: {
         // carID: '桂AA19L0 (自营)', // 车牌号码
         endTime: '', // 还车时间
@@ -342,6 +382,10 @@ export default {
       isShowDrivingRange: false,
       driverCostColumns: [],
       isShowDriverCost: false,
+
+      isReplaceDriving: false,
+      replaceDrivingCostColumns: [],
+      isShowReplaceDrivingCost: false,
     }
   },
   computed: {
@@ -372,6 +416,9 @@ export default {
   },
   watch: {},
   created() {
+    if (this.currentOrder.orderDriveType === '代驾') {
+      this.isReplaceDriving = true
+    }
     this.form = this.currentOrder
     this.days = Number(this.currentOrder.useDays)
     this.form.endTime =
@@ -386,10 +433,11 @@ export default {
     // 初始化时,赋值基础费用
     this.basicFee = this.currentOrder.orderTotalPrice
     this.queryDriverFee()
+    this.queryReplaceDrivingCost()
   },
   mounted() {},
   methods: {
-    // 查询司机费用
+    // 查询司机劳务费
     queryDriverFee() {
       queryDriverFeeOptPrice().then(res => {
         if (res.data.rs === '1') {
@@ -401,7 +449,27 @@ export default {
               id: item.purchasePrdNo,
             }
           })
+          // // 借来测试
+          // this.replaceDrivingCostColumns = this.driverCostColumns
         } else {
+          this.$toast(res.data.rs)
+        }
+      })
+    },
+    // 查询代驾服务费
+    queryReplaceDrivingCost() {
+      queryReplaceDriverFeePrice().then(res => {
+        if (res.data.rs === '1') {
+          console.log('查询代驾服务费', res.data)
+          let price = res.data.queryDrivingServiceFeeOptPrice
+          this.replaceDrivingCostColumns = price.map(item => {
+            return {
+              text: item.prdUnitPrc,
+              id: item.driverFee,
+            }
+          })
+        } else {
+          console.log('查询代驾服务费失败')
           this.$toast(res.data.rs)
         }
       })
@@ -448,6 +516,9 @@ export default {
     showDriverCost() {
       this.isShowDriverCost = !this.isShowDriverCost
     },
+    showReplaceDrivingCost() {
+      this.isShowReplaceDrivingCost = !this.isShowReplaceDrivingCost
+    },
     drivingRangeConfirm(e) {
       console.log('drivingRangeConfirm', e)
       this.drivingRange = e
@@ -458,6 +529,12 @@ export default {
       this.driverCost = e.text
       this.driverCostID = e.id
       this.isShowDriverCost = false
+    },
+    replaceDrivingCostConfirm(e) {
+      console.log('replaceDrivingCostConfirm', e)
+      this.replaceDrivingCost = e.text
+      this.replaceDrivingCostID = e.id
+      this.isShowReplaceDrivingCost = false
     },
     formatter(type, val) {
       if (type === 'year') {
@@ -518,6 +595,7 @@ export default {
         remark: values.remark, // 其它信息
         destCate: this.drivingRange,
         purchasePrdNo: this.driverCostID,
+        // driverFee: '', // 代驾费用
       }
       console.log(params)
       this.$dialog
@@ -537,9 +615,11 @@ export default {
             this.currentOrder.carReturnMode === '上门服务'
           ) {
             params.miniProcNameForEngine = '租车单位签收还车'
+            params.driverFee = this.replaceDrivingCostID ? this.replaceDrivingCostID : '', // 代驾费用
             this.loadAssignReturnCarByService(params)
           } else {
             params.miniProcNameForEngine = '代驾还车'
+            params.driverFee = this.replaceDrivingCostID ? this.replaceDrivingCostID : '', // 代驾费用
             this.loadAssignReturnCar(params)
           }
         })
@@ -656,6 +736,9 @@ export default {
           otherFee: this.form.otherFee ? this.form.otherFee : '0',
           destCate: this.drivingRange ? this.drivingRange : '0',
           purchasePrdNo: this.driverCostID ? this.driverCostID : '0',
+          driverFee: this.replaceDrivingCostID
+            ? this.replaceDrivingCostID
+            : '0',
         }).then(res => {
           if (res.data.rs !== '1') {
             this.$toast.fail(res.data.rs)
