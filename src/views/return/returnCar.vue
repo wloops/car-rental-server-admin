@@ -431,7 +431,8 @@ export default {
     this.dateFormat = date.replace(/-/g, '')
     this.timeFormat = time.replace(/:/g, '') + '00'
     // 初始化时,赋值基础费用
-    this.basicFee = this.currentOrder.orderTotalPrice
+    this.countFee()
+    // this.basicFee = this.currentOrder.orderTotalPrice
     this.queryDriverFee()
     this.queryReplaceDrivingCost()
   },
@@ -452,7 +453,8 @@ export default {
           // // 借来测试
           // this.replaceDrivingCostColumns = this.driverCostColumns
         } else {
-          this.$toast(res.data.rs)
+          console.log('查询司机劳务费失败', res)
+          this.$toast('查询司机劳务费失败' + res.data.rs)
         }
       })
     },
@@ -469,8 +471,8 @@ export default {
             }
           })
         } else {
-          console.log('查询代驾服务费失败')
-          this.$toast(res.data.rs)
+          console.log('查询代驾服务费失败', res)
+          this.$toast('查询司机劳务费失败' + res.data.rs)
         }
       })
     },
@@ -503,7 +505,8 @@ export default {
       }
       this.form.useDays = diffDays
       // 计算基础费用
-      this.countBasicFee(diffDays)
+      // this.countBasicFee(diffDays)
+      this.countFee()
 
       this.isShowDateTime = false
     },
@@ -615,12 +618,16 @@ export default {
             this.currentOrder.carReturnMode === '上门服务'
           ) {
             params.miniProcNameForEngine = '租车单位签收还车'
-            params.driverFee = this.replaceDrivingCostID ? this.replaceDrivingCostID : '', // 代驾费用
-            this.loadAssignReturnCarByService(params)
+            ;(params.driverFee = this.replaceDrivingCostID
+              ? this.replaceDrivingCostID
+              : ''), // 代驾费用
+              this.loadAssignReturnCarByService(params)
           } else {
             params.miniProcNameForEngine = '代驾还车'
-            params.driverFee = this.replaceDrivingCostID ? this.replaceDrivingCostID : '', // 代驾费用
-            this.loadAssignReturnCar(params)
+            ;(params.driverFee = this.replaceDrivingCostID
+              ? this.replaceDrivingCostID
+              : ''), // 代驾费用
+              this.loadAssignReturnCar(params)
           }
         })
         .catch(() => {
@@ -725,30 +732,28 @@ export default {
     // },
     // 计算基础费用和总费用
     countFee(checked) {
-      if (checked) {
-        countReturnFee({
-          billNo: this.currentOrder.billNo,
-          returnDate: this.dateFormat,
-          returnTime: this.timeFormat,
-          endIndex: this.form.OilAfter ? this.form.OilAfter : '0',
-          endMileage: this.form.KilometersAfter,
-          roadTollAmt: this.form.roadFee ? this.form.roadFee : '0',
-          otherFee: this.form.otherFee ? this.form.otherFee : '0',
-          destCate: this.drivingRange ? this.drivingRange : '0',
-          purchasePrdNo: this.driverCostID ? this.driverCostID : '0',
-          driverFee: this.replaceDrivingCostID
-            ? this.replaceDrivingCostID
-            : '0',
-        }).then(res => {
-          if (res.data.rs !== '1') {
-            this.$toast.fail(res.data.rs)
-            return false
-          }
-          console.log(res.data.countReturnFee)
-          this.basicFee = res.data.countReturnFee[0].carRentalFee
+      countReturnFee({
+        billNo: this.currentOrder.billNo,
+        returnDate: this.dateFormat,
+        returnTime: this.timeFormat,
+        endIndex: this.form.OilAfter ? this.form.OilAfter : '0',
+        endMileage: this.form.KilometersAfter ? this.form.KilometersAfter : '0',
+        roadTollAmt: this.form.roadFee ? this.form.roadFee : '0',
+        otherFee: this.form.otherFee ? this.form.otherFee : '0',
+        destCate: this.drivingRange ? this.drivingRange : '0',
+        purchasePrdNo: this.driverCostID ? this.driverCostID : '0',
+        driverFee: this.replaceDrivingCostID ? this.replaceDrivingCostID : '0',
+      }).then(res => {
+        if (res.data.rs !== '1') {
+          this.$toast.fail(res.data.rs)
+          return false
+        }
+        console.log(res.data.countReturnFee)
+        this.basicFee = res.data.countReturnFee[0].carRentalFee
+        if (checked) {
           this.totalFee = `￥${res.data.countReturnFee[0].billTollAmt}`
-        })
-      }
+        }
+      })
     },
     // 选择还车时间计算基础费用
     countBasicFee(diffDays) {
