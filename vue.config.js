@@ -2,6 +2,12 @@ module.exports = {
   configureWebpack: {
     // other webpack options to merge in ...
   },
+  chainWebpack: config => {
+    config.plugin('html').tap(args => {
+      args[0].title = '租场管理'
+      return args
+    })
+  },
 
   // devServer Options don't belong into `configureWebpack`
   publicPath: './',
