@@ -98,7 +98,9 @@
               </div> -->
             </div>
           </template>
-
+          <div class="RememberCode">
+            <van-checkbox v-model="checked">记住密码</van-checkbox>
+          </div>
           <!-- <p class="unPassword" v-if="loginType === true"><a>忘记密码？</a></p> -->
           <div class="loginBtn" style="margin: 1rem" v-if="loginType === true">
             <!-- <van-button
@@ -153,6 +155,7 @@ export default {
   props: {},
   data() {
     return {
+      checked: true,
       loginType: true, // 登录类型,true为账号登录，false为手机验证码登录
       username: '',
       password: '',
@@ -182,14 +185,14 @@ export default {
           required: true,
           message: '请输入密码',
         },
-        {
-          // 自定义校验规则
-          validator: value => {
-            return /^[a-zA-Z0-9_]{6,16}$/.test(value)
-          },
-          message: '请输入正确格式的密码',
-          trigger: 'onBlur',
-        },
+        // {
+        //   // 自定义校验规则
+        //   validator: value => {
+        //     return /^[a-zA-Z0-9_]{6,16}$/.test(value)
+        //   },
+        //   message: '请输入正确格式的密码',
+        //   trigger: 'onBlur',
+        // },
       ],
       phonePattern: /^(?:(?:\+|00)86)?1[3-9]\d{9}$/,
       smsPattern: /^\d{4}$/,
@@ -688,5 +691,10 @@ export default {
   text-align: center;
   margin-top: 2rem;
   color: #ff7636;
+}
+.RememberCode {
+  // font-size: 28px;
+  margin: 1rem;
+  color: #666;
 }
 </style>
