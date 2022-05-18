@@ -60,3 +60,11 @@ export const cancelTheOrderOfUnPayment = data => {
     data,
   })
 }
+// (置等待使用订单为已使用)CGbtnSetOrderStatusToUsed
+export const CGbtnSetOrderStatusToUsed = data => {
+  return request({
+    method: 'POST',
+    url: '/insertReturn/CGbtnSetOrderStatusToUsed',
+    data,
+  })
+}

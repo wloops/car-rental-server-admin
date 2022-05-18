@@ -77,12 +77,13 @@
                       @click="cancellationOrder(item)"
                       >取消订单</van-button
                     >
-                    <!-- <van-button
+                    <van-button
                       type="info"
                       size="small"
                       @click="confirmUseSite(item)"
+                      v-if="item.statusShow === '等待使用'"
                       >确认使用</van-button
-                    > -->
+                    >
                   </div>
                   <!-- <div class="orderBtn returnCar">
                     <van-button
@@ -125,6 +126,7 @@ import {
   getCancOrder,
   cancelTheOrderOfPayment,
   cancelTheOrderOfUnPayment,
+  CGbtnSetOrderStatusToUsed,
 } from '@/api/site/order'
 
 export default {
@@ -373,19 +375,32 @@ export default {
           // on cancel
         })
     },
-    // confirmUseSite(item) {
-    //   this.$dialog
-    //     .confirm({
-    //       title: '提示',
-    //       message: '确定使用？',
-    //     })
-    //     .then(() => {
-    //       // on confirm
-    //     })
-    //     .catch(() => {
-    //       // on cancel
-    //     })
-    // },
+    confirmUseSite(item) {
+      this.$dialog
+        .confirm({
+          title: '提示',
+          message: '确定使用？',
+        })
+        .then(() => {
+          // on confirm
+          CGbtnSetOrderStatusToUsed({
+            srlIDForEngine: 'Splenwise微信预约点餐系统',
+            busiNameForEngine: '运动场地出租业务',
+            busiFunNameForEngine: '更新订单状态',
+            miniProcNameForEngine: '置预约订单为已使用',
+            billNo: item.billNo,
+          }).then(res => {
+            console.log('确定使用', res)
+            if (res.data.rs === '1') {
+              this.onRefresh()
+              this.$toast('场地使用成功')
+            }
+          })
+        })
+        .catch(() => {
+          // on cancel
+        })
+    },
   },
 }
 </script>
