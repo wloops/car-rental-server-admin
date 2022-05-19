@@ -95,3 +95,12 @@ export const getAllOfflineCancOrder = params => {
     params,
   })
 }
+
+// (扫码支付订单退款)CGbtnCodeScanPayOrderRefund
+export const cancelTheOrderOfOffline = data => {
+  return request({
+    method: 'POST',
+    url: '/insertReturn/CGbtnCodeScanPayOrderRefund',
+    data,
+  })
+}

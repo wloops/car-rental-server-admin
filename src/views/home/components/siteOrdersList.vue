@@ -120,6 +120,23 @@
                     >
                   </div> -->
                 </div>
+                <div
+                  class="orderBtn allBtn"
+                  v-if="
+                    btnRole === true &&
+                    item.status !== '7' &&
+                    item.status !== '27' &&
+                    orderActive === '扫码支付订单'
+                  "
+                >
+                  <van-button
+                    type="info"
+                    size="small"
+                    @click="cancellationOrderOfOffline(item)"
+                    v-if="item.statusShow === '已完成' || item.statusShow === '已支付'"
+                    >取消订单</van-button
+                  >
+                </div>
               </div>
             </van-grid-item>
           </van-grid>
@@ -141,6 +158,7 @@ import {
   getAllOfflineOrder,
   getAllOfflineCompletedOrder,
   getAllOfflineCancOrder,
+  cancelTheOrderOfOffline,
 } from '@/api/site/order'
 
 export default {
@@ -449,6 +467,37 @@ export default {
         billNo: item.billNo,
       }
       console.log('取消订单参数', params)
+      this.$dialog
+        .confirm({
+          title: '提示',
+          message: '确定取消订单？',
+        })
+        .then(() => {
+          // on confirm
+          // 根据支付状态判断如何取消订单
+          cancelTheOrderOfOffline(params).then(res => {
+            if (res.data.rs === '1') {
+              this.onRefresh()
+              this.$toast('取消订单成功')
+            } else {
+              this.$toast(res.data.rs)
+            }
+          })
+        })
+        .catch(() => {
+          // on cancel
+        })
+    },
+    // 取消租场扫码支付订单
+    cancellationOrderOfOffline(item) {
+      let params = {
+        srlIDForEngine: 'Splenwise微信预约点餐系统',
+        busiNameForEngine: '运动场地出租业务',
+        busiFunNameForEngine: '线上退场',
+        miniProcNameForEngine: '扫码支付订单退款',
+        billNo: item.billNo,
+      }
+      console.log('取消扫码支付订单参数', params)
       this.$dialog
         .confirm({
           title: '提示',
