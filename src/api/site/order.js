@@ -68,3 +68,30 @@ export const CGbtnSetOrderStatusToUsed = data => {
     data,
   })
 }
+
+// (查询运动商家全部线下订单)querySportBusinessOfflineOrders
+export const getAllOfflineOrder = params => {
+  return request({
+    method: 'GET',
+    url: '/search/querySportBusinessOfflineOrders',
+    params,
+  })
+}
+
+// (查询运动商家线下已完成订单)querySportBusiOfflineCompletedOrders
+export const getAllOfflineCompletedOrder = params => {
+  return request({
+    method: 'GET',
+    url: '/search/querySportBusiOfflineCompletedOrders',
+    params,
+  })
+}
+
+// (查询运动商家线下已取消订单)querySportBusinessOfflineCancOrders
+export const getAllOfflineCancOrder = params => {
+  return request({
+    method: 'GET',
+    url: '/search/querySportBusinessOfflineCancOrders',
+    params,
+  })
+}

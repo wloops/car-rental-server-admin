@@ -32,13 +32,23 @@
                 </div>
                 <div class="orderInfo">
                   <p>场馆名称 : {{ item.venueName }}</p>
-                  <p>预约场地 : {{ siteNameShow(item) }}</p>
+                  <p v-if="orderActive === '线上预约订单'">
+                    预约场地 : {{ siteNameShow(item) }}
+                  </p>
                   <p>订单编号 : {{ item.billNo }}</p>
                   <!-- <p>下单账号 :{{ '1063659' }}</p> -->
-                  <p>预约日期 : {{ item.orderDate }}</p>
-                  <p>
+                  <p v-if="orderActive === '线上预约订单'">
+                    预约日期 : {{ item.orderDate }}
+                  </p>
+                  <p v-if="orderActive === '线上预约订单'">
                     预约时间 :
                     {{ orderTimeShow(item) }}
+                  </p>
+                  <p v-if="orderActive === '线上预约订单'">
+                    预留称呼 : {{ item.receiverName }}
+                  </p>
+                  <p v-if="orderActive === '线上预约订单'">
+                    联系电话 : {{ item.mobile }}
                   </p>
                   <p>订单金额 : ￥{{ item.orderTotalPrice }}</p>
                 </div>
@@ -48,7 +58,8 @@
                   v-if="
                     btnRole === true &&
                     item.status !== '7' &&
-                    item.status !== '27'
+                    item.status !== '27' &&
+                    orderActive === '线上预约订单'
                   "
                 >
                   <!-- <van-popover
@@ -127,6 +138,9 @@ import {
   cancelTheOrderOfPayment,
   cancelTheOrderOfUnPayment,
   CGbtnSetOrderStatusToUsed,
+  getAllOfflineOrder,
+  getAllOfflineCompletedOrder,
+  getAllOfflineCancOrder,
 } from '@/api/site/order'
 
 export default {
@@ -135,11 +149,15 @@ export default {
   props: {
     thisTabs: {
       type: String,
-      default: '全部订单',
+      default: '0',
     },
     btnRole: {
       type: Boolean,
       default: false,
+    },
+    orderActive: {
+      type: String,
+      default: '线上预约订单',
     },
   },
   data() {
@@ -161,7 +179,18 @@ export default {
     }
   },
   computed: {},
-  watch: {},
+  watch: {
+    orderActive: {
+      handler(newVal, oldVal) {
+        this.loading = true
+        this.pageNum = 0
+        this.orderList = []
+        this.list = []
+        this.onRefresh()
+      },
+      // immediate: true,
+    },
+  },
   created() {
     // this.onLoad()
   },
@@ -199,6 +228,7 @@ export default {
     },
     onLoad() {
       console.log('onload')
+
       // 异步更新数据
       // setTimeout 仅做示例，真实场景中一般为 ajax 请求
       // this.loading = true
@@ -212,28 +242,29 @@ export default {
         // }
         // 筛选订单类型
         let userRole = window.localStorage.getItem('userRole')
+        console.log('orderActive:', this.orderActive)
 
-        if (this.thisTabs === '全部订单') {
+        if (this.thisTabs === '0') {
           this.pageNum++
-          // if (userRole.indexOf('司机') > -1) {
-          //   this.loadAllOrderOfDriver()
-          // } else {
-          this.loadAllOrder()
-          // }
-        } else if (this.thisTabs === '已预约') {
+          if (this.orderActive === '扫码支付订单') {
+            this.loadAllOrderOfScan()
+          } else {
+            this.loadAllOrder()
+          }
+        } else if (this.thisTabs === '1') {
           this.pageNum++
-          // if (userRole.indexOf('司机') > -1) {
-          //   this.loadWaitOrderOfDriver()
-          // } else {
-          this.loadWaitOrder()
-          // }
+          if (this.orderActive === '扫码支付订单') {
+            this.loadWaitOrderOfScan()
+          } else {
+            this.loadWaitOrder()
+          }
         } else {
           this.pageNum++
-          // if (userRole.indexOf('司机') > -1) {
-          //   this.loadWaitOrderOfDriver()
-          // } else {
-          this.loadCancOrder()
-          // }
+          if (this.orderActive === '扫码支付订单') {
+            this.loadCancOrderOfScan()
+          } else {
+            this.loadCancOrder()
+          }
         }
         // // 加载状态结束
         // this.loading = false
@@ -321,6 +352,84 @@ export default {
           this.finished =
             this.orderList.length >=
             res.data.querySportBusinessCancOrders_totalRecNum
+        } else {
+          console.log(res.data.rs)
+          this.loading = false
+          this.error = true
+          this.pageNum = 0
+        }
+      })
+    },
+    loadAllOrderOfScan() {
+      getAllOfflineOrder({
+        currentPage: this.pageNum,
+        numOfPerPage: this.pageSize,
+      }).then(res => {
+        if (res.data.rs === '1') {
+          console.log('线下扫码全部订单', res)
+          console.log('线下扫码全部订单', res.data)
+          this.orderList = this.orderList.concat(
+            res.data.querySportBusinessOfflineOrders
+          )
+          this.totalNum = res.data.querySportBusinessOfflineOrders_totalRecNum
+          this.list = this.orderList
+          console.log('this.list', this.list)
+          this.loading = false
+          this.finished =
+            this.orderList.length >=
+            res.data.querySportBusinessOfflineOrders_totalRecNum
+        } else {
+          console.log(res.data.rs)
+          this.loading = false
+          this.error = true
+          this.pageNum = 0
+        }
+      })
+    },
+    loadWaitOrderOfScan() {
+      getAllOfflineCompletedOrder({
+        currentPage: this.pageNum,
+        numOfPerPage: this.pageSize,
+      }).then(res => {
+        if (res.data.rs === '1') {
+          console.log('线下扫码已预约订单', res.data)
+          this.orderList = this.orderList.concat(
+            res.data.querySportBusiOfflineCompletedOrders
+          )
+          this.totalNum =
+            res.data.querySportBusiOfflineCompletedOrders_totalRecNum
+          this.list = this.orderList
+          console.log('this.list', this.list)
+          this.loading = false
+          this.finished =
+            this.orderList.length >=
+            res.data.querySportBusiOfflineCompletedOrders_totalRecNum
+        } else {
+          console.log(res.data.rs)
+          this.loading = false
+          this.error = true
+          this.pageNum = 0
+        }
+      })
+    },
+    loadCancOrderOfScan() {
+      getAllOfflineCancOrder({
+        currentPage: this.pageNum,
+        numOfPerPage: this.pageSize,
+      }).then(res => {
+        if (res.data.rs === '1') {
+          console.log('线下扫码已预约订单', res.data)
+          this.orderList = this.orderList.concat(
+            res.data.querySportBusinessOfflineCancOrders
+          )
+          this.totalNum =
+            res.data.querySportBusinessOfflineCancOrders_totalRecNum
+          this.list = this.orderList
+          console.log('this.list', this.list)
+          this.loading = false
+          this.finished =
+            this.orderList.length >=
+            res.data.querySportBusinessOfflineCancOrders_totalRecNum
         } else {
           console.log(res.data.rs)
           this.loading = false

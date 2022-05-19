@@ -55,6 +55,8 @@ import {
   Switch,
   Collapse,
   CollapseItem,
+  DropdownMenu,
+  DropdownItem,
 } from 'vant'
 
 const components = [
@@ -113,6 +115,8 @@ const components = [
   Switch,
   Collapse,
   CollapseItem,
+  DropdownMenu,
+  DropdownItem,
 ]
 
 function install(Vue) {

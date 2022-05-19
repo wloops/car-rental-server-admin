@@ -61,27 +61,37 @@
       </van-cell-group>
     </div> -->
     <div class="myOrders">
-      <div class="orderTitle">我的订单</div>
+      <!-- <div class="orderTitle">我的订单</div> -->
+      <van-dropdown-menu active-color="#196ef7">
+        <van-dropdown-item
+          v-model="value1"
+          :options="option1"
+          @change="changeOrderType"
+        />
+      </van-dropdown-menu>
       <div class="orders">
         <div class="tabs">
           <van-tabs v-model="active" swipeable animated sticky>
             <van-tab title="全部订单">
               <site-orders-list
-                this-tabs="全部订单"
+                this-tabs="0"
+                :order-active="orderActive"
                 :btn-role="isShowBtn"
                 page="home"
               ></site-orders-list>
             </van-tab>
-            <van-tab title="已预约">
+            <van-tab :title="titleText1">
               <site-orders-list
-                this-tabs="已预约"
+                this-tabs="1"
+                :order-active="orderActive"
                 :btn-role="isShowBtn"
                 page="home"
               ></site-orders-list>
             </van-tab>
-            <van-tab title="已取消">
+            <van-tab :title="titleText2">
               <site-orders-list
-                this-tabs="已取消"
+                this-tabs="2"
+                :order-active="orderActive"
                 :btn-role="isShowBtn"
                 page="home"
               ></site-orders-list>
@@ -118,6 +128,15 @@ export default {
       adminNameTitle: '', // 管理员标题
 
       isShowBtn: false, // 是否显示按钮
+
+      titleText1: '已预约',
+      titleText2: '已取消',
+      value1: 0,
+      option1: [
+        { text: '线上预约订单', value: 0 },
+        { text: '扫码支付订单', value: 1 },
+      ],
+      orderActive: '线上预约订单',
     }
   },
   computed: {},
@@ -163,6 +182,18 @@ export default {
           // this.$toast(res.data.rs)
         }
       })
+    },
+    changeOrderType(val) {
+      console.log('changeOrderType', val)
+      if (val === 0) {
+        this.orderActive = '线上预约订单'
+        this.titleText1 = '已预约'
+        this.titleText2 = '已取消'
+      } else if (val === 1) {
+        this.orderActive = '扫码支付订单'
+        this.titleText1 = '已支付'
+        this.titleText2 = '已取消'
+      }
     },
   },
 }
