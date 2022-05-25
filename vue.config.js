@@ -4,8 +4,8 @@ module.exports = {
   },
   chainWebpack: config => {
     config.plugin('html').tap(args => {
-      // args[0].title = '管理端'
-      args[0].title = '租车管理'
+      args[0].title = '管理端'
+      // args[0].title = '租车管理'
       // args[0].title = '租场管理'
       return args
     })

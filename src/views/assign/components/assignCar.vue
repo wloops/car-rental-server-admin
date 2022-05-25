@@ -226,8 +226,8 @@ export default {
             assetsSrlID: srlID,
             carID: carID,
             oilSrlID: '汽油',
-            beginIndex: values.OilBefore,
-            beginMileage: values.KilometersBefore,
+            beginIndex: values.OilBefore ? values.OilBefore : '0',
+            beginMileage: values.KilometersBefore ? values.KilometersBefore : '0',
           }
           if (this.currentOrder.carNumber === '') {
             if (

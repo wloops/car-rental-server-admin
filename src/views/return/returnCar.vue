@@ -40,7 +40,6 @@
         v-model="isShowDateTime"
         position="bottom"
         round
-        :style="{ height: '35%' }"
       >
         <van-datetime-picker
           v-model="currentDate"
@@ -76,7 +75,6 @@
         v-model="isShowDrivingRange"
         position="bottom"
         round
-        :style="{ height: '35%' }"
       >
         <van-picker
           show-toolbar
@@ -84,6 +82,7 @@
           :columns="drivingRangeColumns"
           :default-index="0"
           @confirm="drivingRangeConfirm"
+          @cancel="isShowDrivingRange = !isShowDrivingRange"
         />
       </van-popup>
       <van-field
@@ -291,7 +290,6 @@
         v-model="isShowDriverCost"
         position="bottom"
         round
-        :style="{ height: '35%' }"
       >
         <van-picker
           show-toolbar
