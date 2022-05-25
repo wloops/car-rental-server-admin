@@ -100,7 +100,7 @@
                       type="info"
                       size="small"
                       @click="toAssignCar(item)"
-                      v-if="item.orderStatusShow === '未提车'"
+                      v-if="assignCarBtn(item)"
                       >指派车辆</van-button
                     >
                   </div>
@@ -306,6 +306,27 @@ export default {
           return true
         } else {
           return false
+        }
+      }
+    },
+    assignCarBtn(item) {
+      if (item.orderStatusShow === '未提车') {
+        if (item.orderDriveType === '代驾') {
+          if (item.subDriver !== '') {
+            return true
+          } else {
+            return false
+          }
+        } else {
+          if (item.carPickUpMode === '自行取车') {
+            return true
+          } else {
+            if (item.delDriver !== '') {
+              return true
+            } else {
+              return false
+            }
+          }
         }
       }
     },

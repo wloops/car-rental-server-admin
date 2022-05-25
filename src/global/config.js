@@ -61,11 +61,11 @@ if (process.env.NODE_ENV === 'development') {
   // 测试环境
   // BASE_URL = 'http://www.paytunnel.cn/carRentalServerRH'
   // 测试环境 租场管理 venueReservationAdmin
-  BASE_URL = 'http://www.paytunnel.cn/venueReservationServerRH'
-  BASE_DOMAIN = 'http://www.paytunnel.cn'
+  // BASE_URL = 'http://www.paytunnel.cn/venueReservationServerRH'
+  // BASE_DOMAIN = 'http://www.paytunnel.cn'
   // 生产环境
-  // BASE_URL = 'http://www.gxgscloud.cn/carRentalServerRH'
-  // BASE_DOMAIN = 'http://www.gxgscloud.cn'
+  BASE_URL = 'http://www.gxgscloud.cn/carRentalServerRH'
+  BASE_DOMAIN = 'http://www.gxgscloud.cn'
 
   // BASE_COMNAME = '广州睿颢软件技术有限公司'
 } else {

@@ -194,7 +194,7 @@ export default {
     },
     // 提交表单
     onSubmit(values) {
-      // 判断是否送车上门,是否有送门上次人员(delDriver),有则继续
+      // 判断是否送车上门,是否有送车上门人员(delDriver),有则继续
       if (this.currentOrder.carPickUpMode === '送车上门') {
         if (this.currentOrder.delDriver === '') {
           this.$toast.fail('请先指派送车上门人员')
