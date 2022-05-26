@@ -72,7 +72,7 @@
                   <van-popover
                     v-model="showPopover[index]"
                     trigger="click"
-                    placement="top-end"
+                    placement="top-start"
                     :actions="actions"
                     @select="changeAssign"
                     v-if="item.orderStatusShow !== '已还车'"
@@ -153,7 +153,7 @@ import {
   getWaitOrder,
   getAllOrderOfDriver,
   getWaitOrderOfDriver,
-  setCancelOrder
+  setCancelOrder,
 } from '@/api/order'
 
 import { assignCarRentalCollectedCar } from '@/api/assign'
@@ -204,7 +204,7 @@ export default {
   methods: {
     // 取消订单
     cancelOrder(item) {
-      console.log('cancelOrder:',item)
+      console.log('cancelOrder:', item)
       // 格式化当前时间
       let cancelDate = dayjs().format('YYYYMMDD')
       let cancelTime = dayjs().format('HHmmss')
@@ -216,10 +216,10 @@ export default {
         busiFunNameForEngine: '取消租车订单',
         miniProcNameForEngine: '取消租车订单',
         saleCmpName: window.localStorage.getItem('REALUSERNAME'),
-        driver: item.driver ? item.driver : '',
-        carSender: '',
-        carReceiver: '',
-        carID: item.carID ? item.carID : '',
+        driver: item.subDriver ? item.subDriver : '',
+        carSender: item.delDriver ? item.delDriver : '',
+        carReceiver: item.retDriver ? item.retDriver : '',
+        carID: item.carNumber ? item.carNumber : '',
         billNo: item.billNo,
         cancelDate: cancelDate,
         cancelTime: cancelTime,
