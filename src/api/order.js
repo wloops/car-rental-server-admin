@@ -77,3 +77,12 @@ export const getViolation = params => {
     params,
   })
 }
+
+// (取消租车订单)ZCbtnCancelOrder
+export const setCancelOrder = params => {
+  return request({
+    method: 'GET',
+    url: '/insertReturn/ZCbtnCancelOrder',
+    params,
+  })
+}

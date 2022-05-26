@@ -120,6 +120,14 @@
                       >已送达</van-button
                     >
                     <van-button
+                      class="cancelOrder"
+                      size="small"
+                      type="warning"
+                      @click="cancelOrder(item)"
+                      v-if="item.orderStatusShow !== '已还车'"
+                      >取消订单</van-button
+                    >
+                    <van-button
                       type="info"
                       size="small"
                       @click="enterViolation(item)"
@@ -139,11 +147,13 @@
 </template>
 
 <script>
+var dayjs = require('dayjs')
 import {
   getAllOrder,
   getWaitOrder,
   getAllOrderOfDriver,
   getWaitOrderOfDriver,
+  setCancelOrder
 } from '@/api/order'
 
 import { assignCarRentalCollectedCar } from '@/api/assign'
@@ -192,6 +202,47 @@ export default {
 
   mounted() {},
   methods: {
+    // 取消订单
+    cancelOrder(item) {
+      console.log('cancelOrder:',item)
+      // 格式化当前时间
+      let cancelDate = dayjs().format('YYYYMMDD')
+      let cancelTime = dayjs().format('HHmmss')
+      console.log('cancelDate', cancelDate)
+      console.log('cancelTime', cancelTime)
+      let params = {
+        srlIDForEngine: 'Splenwise微信预约点餐系统',
+        busiNameForEngine: '汽车租赁业务',
+        busiFunNameForEngine: '取消租车订单',
+        miniProcNameForEngine: '取消租车订单',
+        saleCmpName: window.localStorage.getItem('REALUSERNAME'),
+        driver: item.driver ? item.driver : '',
+        carSender: '',
+        carReceiver: '',
+        carID: item.carID ? item.carID : '',
+        billNo: item.billNo,
+        cancelDate: cancelDate,
+        cancelTime: cancelTime,
+        remark: '',
+      }
+      console.log('取消订单参数', params)
+      this.$dialog
+        .confirm({
+          title: '提示',
+          message: '确定取消订单吗？',
+        })
+        .then(() => {
+          setCancelOrder(params).then(res => {
+            if (res.data.rs === '1') {
+              this.refreshing = true
+              this.onRefresh()
+              this.$toast('取消订单成功')
+            } else {
+              this.$toast(res.data.rs)
+            }
+          })
+        })
+    },
     //是否显示当前气泡弹窗 js 重叠处理
     stopPropagation(e) {
       e = e || window.event
