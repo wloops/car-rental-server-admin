@@ -127,14 +127,12 @@
       />
       <van-field
         colon
-        required
         v-model="form.KilometersAfter"
         type="number"
         name="KilometersAfter"
         label="收车里程(km)"
         placeholder="请填写收车里程"
         @blur="countKm"
-        :rules="[{ required: true, message: '请填写收车里程' }]"
       />
       <van-field
         colon
@@ -374,7 +372,7 @@ export default {
       totalFee: '', // 费用总计
       dateFormat: '', // 日期格式化
       timeFormat: '', // 时间格式化
-      isDisabled: true, // 是否禁用
+      isDisabled: false, // 是否禁用
 
       drivingRangeColumns: ['附近乡镇', '偏远乡镇'],
       isShowDrivingRange: false,
@@ -584,7 +582,7 @@ export default {
         returnDate: dateFormat,
         returnTime: timeFormat,
         endIndex: values.OilAfter.toString(), // 油量
-        endMileage: values.KilometersAfter.toString(), // 行驶里程
+        endMileage: values.KilometersAfter ? values.KilometersAfter : '0', // 行驶里程
         roadTollNum: '1',
         roadTollAmt: values.roadFee ? values.roadFee.toString() : '0', // 过路费
         roadTollRemark: values.roadTollRemark,
@@ -675,11 +673,11 @@ export default {
     countKm() {
       // 判断必填项是否为空
       console.log(this.form.KilometersAfter, this.form.OilAfter)
-      if (!this.form.KilometersAfter) {
-        this.isDisabled = true
-      } else {
-        this.isDisabled = false
-      }
+      // if (!this.form.KilometersAfter) {
+      //   this.isDisabled = true
+      // } else {
+      //   this.isDisabled = false
+      // }
       queryMileage({
         billNo: this.currentOrder.billNo,
         endMileage: this.form.KilometersAfter,
@@ -701,11 +699,11 @@ export default {
       // 判断必填项是否为空
       console.log(this.form.KilometersAfter, this.form.OilAfter)
 
-      if (!this.form.KilometersAfter) {
-        this.isDisabled = true
-      } else {
-        this.isDisabled = false
-      }
+      // if (!this.form.KilometersAfter) {
+      //   this.isDisabled = true
+      // } else {
+      //   this.isDisabled = false
+      // }
     },
     addItem() {
       this.trafficTickets.push({

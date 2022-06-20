@@ -43,10 +43,8 @@
       </van-popup>
       <van-field
         v-model="form.KilometersBefore"
-        required
         name="KilometersBefore"
         label="公里数"
-        :rules="[{ required: true, message: '请填写公里数' }]"
       />
       <van-field v-model="form.OilBefore" name="OilBefore" label="油量" />
       <div class="otherInfo">
@@ -227,7 +225,9 @@ export default {
             carID: carID,
             oilSrlID: '汽油',
             beginIndex: values.OilBefore ? values.OilBefore : '0',
-            beginMileage: values.KilometersBefore ? values.KilometersBefore : '0',
+            beginMileage: values.KilometersBefore
+              ? values.KilometersBefore
+              : '0',
           }
           if (this.currentOrder.carNumber === '') {
             if (
