@@ -133,7 +133,10 @@
                     type="info"
                     size="small"
                     @click="cancellationOrderOfOffline(item)"
-                    v-if="item.statusShow === '已完成' || item.statusShow === '已支付'"
+                    v-if="
+                      item.statusShow === '已完成' ||
+                      item.statusShow === '已支付'
+                    "
                     >取消订单</van-button
                   >
                 </div>
@@ -466,6 +469,7 @@ export default {
         busiFunNameForEngine: '线上退场',
         miniProcNameForEngine: '完成线上退场',
         billNo: item.billNo,
+        venueName: item.venueName,
       }
       console.log('取消订单参数', params)
       this.$dialog

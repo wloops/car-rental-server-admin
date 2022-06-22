@@ -36,11 +36,7 @@
         :rules="[{ required: true, message: '请选择还车时间' }]"
       />
       <!-- <van-calendar v-model="showCalendar" @confirm="onConfirm" /> -->
-      <van-popup
-        v-model="isShowDateTime"
-        position="bottom"
-        round
-      >
+      <van-popup v-model="isShowDateTime" position="bottom" round>
         <van-datetime-picker
           v-model="currentDate"
           type="datetime"
@@ -71,11 +67,7 @@
         :rules="[{ required: true, message: '请选择行驶范围' }]"
       />
       <!-- <van-calendar v-model="showCalendar" @confirm="onConfirm" /> -->
-      <van-popup
-        v-model="isShowDrivingRange"
-        position="bottom"
-        round
-      >
+      <van-popup v-model="isShowDrivingRange" position="bottom" round>
         <van-picker
           show-toolbar
           title="选择行驶范围"
@@ -284,11 +276,7 @@
         "
       />
       <!-- <van-calendar v-model="showCalendar" @confirm="onConfirm" /> -->
-      <van-popup
-        v-model="isShowDriverCost"
-        position="bottom"
-        round
-      >
+      <van-popup v-model="isShowDriverCost" position="bottom" round>
         <van-picker
           show-toolbar
           title="选择司机劳务费"
@@ -684,6 +672,11 @@ export default {
       }).then(res => {
         console.log('查询行驶里程', res)
         if (res.data.rs === '1') {
+          if (res.data.queryMileage_totalRecNum === 0) {
+            this.$toast.fail(`出车里程没有录入，无法计算！`)
+            this.form.KilometersAfter = ''
+            return
+          }
           let mileage = Number(res.data.queryMileage[0].mileage)
           if (mileage > 0) {
             this.KilometersAll = res.data.queryMileage[0].mileage
