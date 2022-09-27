@@ -23,6 +23,14 @@ export const getAvailableCar = params => {
     params,
   })
 }
+// 查询可派车辆
+export const queryAvailableCarsNumberAffiliation = params => {
+  return request({
+    method: 'GET',
+    url: '/search/queryAvailableCarsNumberAffiliation',
+    params,
+  })
+}
 
 // 指派代驾车辆
 export const assignSubstituteCar = params => {

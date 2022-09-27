@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import { Toast, Dialog } from 'vant'
+
+import { BASE_PROJECT } from '@/global/config'
 Vue.use(VueRouter)
 
 const routes = [
@@ -97,7 +99,8 @@ router.beforeEach((to, from, next) => {
     next()
   }
   if (to.path == '/') {
-    if (userRole.indexOf('运动场地') > -1) {
+    // if (userRole.indexOf('运动场地') > -1) {
+    if (BASE_PROJECT === 'site') {
       if (user && userID) {
         // 已登录,允许通过
         next('/site')

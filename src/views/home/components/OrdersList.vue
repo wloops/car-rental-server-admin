@@ -11,20 +11,12 @@
           @load="onLoad"
         >
           <van-grid :gutter="15" :column-num="1">
-            <van-grid-item
-              v-for="(item, index) in list"
-              :key="item.orderNumber"
-              @click="stopPropagation"
-            >
+            <van-grid-item v-for="(item, index) in list" :key="item.orderNumber" @click="stopPropagation">
               <div class="orderItem">
                 <div class="useStatus">
                   <span class="orderTopText">{{ item.orderDriveType }}</span>
-                  <span class="orderTopText">{{
-                    item.transDate + ' ' + item.transTime
-                  }}</span>
-                  <span class="orderTopText">{{
-                    item.tradeStatus === '2' ? '已取消' : item.orderStatusShow
-                  }}</span>
+                  <span class="orderTopText">{{ item.transDate + ' ' + item.transTime }}</span>
+                  <span class="orderTopText">{{ item.tradeStatus === '2' ? '已取消' : item.orderStatusShow }}</span>
                 </div>
                 <div class="orderInfo">
                   <p>用车单位 : {{ item.purchaseCompanyName }}</p>
@@ -36,39 +28,24 @@
                   </p>
                   <p>
                     还车时间 :
-                    {{ item.CARUSETIMEEND + ' ' + item.orderEndTime }}({{
-                      item.useDays
-                    }}天)
+                    {{ item.CARUSETIMEEND + ' ' + item.orderEndTime }}({{ item.useDays }}天)
                   </p>
                   <p>订单金额 : ￥{{ item.orderTotalPrice }}</p>
                   <!-- <p>驾驶方式 : {{ item.orderDriveType }}</p> -->
                   <p>联系人 :{{ item.receiverName }}</p>
                   <p>电话 : {{ item.mobile }}</p>
-                  <div class="orderAddress van-multi-ellipsis--l2">
-                    接车地址 : {{ item.deliveryAddr }}
-                  </div>
+                  <div class="orderAddress van-multi-ellipsis--l2">接车地址 : {{ item.deliveryAddr }}</div>
                   <p>
                     取车方式 :
-                    {{
-                      item.orderDriveType === '代驾'
-                        ? '送车上门'
-                        : item.carPickUpMode
-                    }}
+                    {{ item.orderDriveType === '代驾' ? '送车上门' : item.carPickUpMode }}
                   </p>
                   <p>
                     还车方式 :
-                    {{
-                      item.orderDriveType === '代驾'
-                        ? '上门服务'
-                        : item.carReturnMode
-                    }}
+                    {{ item.orderDriveType === '代驾' ? '上门服务' : item.carReturnMode }}
                   </p>
                 </div>
 
-                <div
-                  class="orderBtn allBtn"
-                  v-if="btnRole === true && item.tradeStatus !== '2'"
-                >
+                <div class="orderBtn allBtn" v-if="btnRole === true && item.tradeStatus !== '2'">
                   <van-popover
                     v-model="showPopover[index]"
                     trigger="click"
@@ -78,60 +55,21 @@
                     v-if="item.orderStatusShow !== '已还车'"
                   >
                     <template #reference>
-                      <van-button
-                        type="primary"
-                        size="small"
-                        @click="assignInfo(item)"
-                      >
-                        指派状态</van-button
-                      >
+                      <van-button type="primary" size="small" @click="assignInfo(item)"> 指派状态</van-button>
                     </template>
                   </van-popover>
 
                   <div class="orderBtn">
-                    <van-button
-                      type="info"
-                      size="small"
-                      @click="toAssignDriver(item)"
-                      v-if="assignDriverBtn(item)"
-                      >指派司机</van-button
-                    >
-                    <van-button
-                      type="info"
-                      size="small"
-                      @click="toAssignCar(item)"
-                      v-if="assignCarBtn(item)"
-                      >指派车辆</van-button
-                    >
+                    <van-button type="info" size="small" @click="toAssignDriver(item)" v-if="assignDriverBtn(item)">指派司机</van-button>
+                    <van-button type="info" size="small" @click="toAssignCar(item)" v-if="assignCarBtn(item)">指派车辆</van-button>
                   </div>
                   <div class="orderBtn returnCar">
-                    <van-button
-                      type="info"
-                      size="small"
-                      @click="toReturnCar(item)"
-                      v-if="isReturnCar(item)"
-                      >还车/计算费用</van-button
-                    >
-                    <van-button
-                      type="info"
-                      size="small"
-                      @click="carDelivered(item)"
-                      v-if="item.orderStatusShow === '上门送车中'"
-                      >已送达</van-button
-                    >
-                    <van-button
-                      class="cancelOrder"
-                      size="small"
-                      type="warning"
-                      @click="cancelOrder(item)"
-                      v-if="item.orderStatusShow !== '已还车'"
+                    <van-button type="info" size="small" @click="toReturnCar(item)" v-if="isReturnCar(item)">还车/计算费用</van-button>
+                    <van-button type="info" size="small" @click="carDelivered(item)" v-if="item.orderStatusShow === '上门送车中'">已送达</van-button>
+                    <van-button class="cancelOrder" size="small" type="warning" @click="cancelOrder(item)" v-if="item.orderStatusShow !== '已还车'"
                       >取消订单</van-button
                     >
-                    <van-button
-                      type="info"
-                      size="small"
-                      @click="enterViolation(item)"
-                      v-if="item.orderStatusShow === '已还车'"
+                    <van-button type="info" size="small" @click="enterViolation(item)" v-if="item.orderStatusShow === '已还车'"
                       >录入违章信息</van-button
                     >
                   </div>
@@ -148,13 +86,7 @@
 
 <script>
 var dayjs = require('dayjs')
-import {
-  getAllOrder,
-  getWaitOrder,
-  getAllOrderOfDriver,
-  getWaitOrderOfDriver,
-  setCancelOrder,
-} from '@/api/order'
+import { getAllOrder, getWaitOrder, getAllOrderOfDriver, getWaitOrderOfDriver, setCancelOrder } from '@/api/order'
 
 import { assignCarRentalCollectedCar } from '@/api/assign'
 
@@ -255,13 +187,9 @@ export default {
     },
     assignInfo(item) {
       // 初始化 防止覆盖
-      this.actions = [{ text: '司机：[去指派]' }, { text: '车辆：[去指派]' }]
+      this.actions = [{ text: '司机：未指派' }, { text: '车辆：未指派' }]
       let showdriver = ''
-      if (
-        item.delDriver !== '' ||
-        item.subDriver !== '' ||
-        item.retDriver !== ''
-      ) {
+      if (item.delDriver !== '' || item.subDriver !== '' || item.retDriver !== '') {
         if (item.subDriver) {
           showdriver = `${item.subDriver}(代驾)`
         } else if (item.delDriver && item.retDriver) {
@@ -280,20 +208,16 @@ export default {
         }
         this.actions[0].text = `司机：${showdriver} [点击更换]`
       } else {
-        if (
-          item.orderDriveType === '自驾' &&
-          item.carPickUpMode === '自行取车' &&
-          item.carReturnMode === '自行还车'
-        ) {
+        if (item.orderDriveType === '自驾' && item.carPickUpMode === '自行取车' && item.carReturnMode === '自行还车') {
           this.actions[0].text = '自驾自取自还'
         } else {
-          this.actions[0].text = '司机：[去指派]'
+          this.actions[0].text = '司机：未指派'
         }
       }
       if (item.orderStatusShow !== '未提车') {
         this.actions[1].text = `车辆：${item.carNumber} [点击更换]`
       } else {
-        this.actions[1].text = `车辆：[去指派]`
+        this.actions[1].text = `车辆：未指派`
       }
 
       // 提前存入当前订单信息
@@ -302,6 +226,9 @@ export default {
     // 点击更改指派状态
     changeAssign(action) {
       console.log(action.text)
+      if (action.text.indexOf('未指派') > -1) {
+        return
+      }
       if (action.text.indexOf('司机') !== -1) {
         this.$store.commit('order/setIsAssignDriver', false)
         // 进入指派界面(更改)
@@ -340,19 +267,13 @@ export default {
             return false
           }
         }
-      } else if (
-        item.orderDriveType === '自驾' &&
-        item.orderStatusShow === '已提车'
-      ) {
+      } else if (item.orderDriveType === '自驾' && item.orderStatusShow === '已提车') {
         if (item.carReturnMode === '自行还车') {
           return false
         } else {
           return true
         }
-      } else if (
-        item.orderDriveType === '代驾' &&
-        item.orderStatusShow === '未提车'
-      ) {
+      } else if (item.orderDriveType === '代驾' && item.orderStatusShow === '未提车') {
         if (item.subDriver === '') {
           return true
         } else {
@@ -385,19 +306,13 @@ export default {
     isReturnCar(item) {
       if (item.orderDriveType === '代驾' && item.orderStatusShow === '已提车') {
         return true
-      } else if (
-        item.orderDriveType === '自驾' &&
-        item.carReturnMode === '上门服务'
-      ) {
+      } else if (item.orderDriveType === '自驾' && item.carReturnMode === '上门服务') {
         if (item.orderStatusShow === '上门收车中') {
           return true
         } else {
           return false
         }
-      } else if (
-        item.orderDriveType === '自驾' &&
-        item.carReturnMode === '自行还车'
-      ) {
+      } else if (item.orderDriveType === '自驾' && item.carReturnMode === '自行还车') {
         if (item.orderStatusShow === '已提车') {
           return true
         } else {
@@ -524,8 +439,7 @@ export default {
           this.list = this.orderList
           console.log('this.list', this.list)
           this.loading = false
-          this.finished =
-            this.orderList.length >= res.data.queryCarMercAllOrders_totalRecNum
+          this.finished = this.orderList.length >= res.data.queryCarMercAllOrders_totalRecNum
         } else {
           console.log(res.data.rs)
           this.loading = false
@@ -546,8 +460,7 @@ export default {
           this.list = this.orderList
           console.log('this.list', this.list)
           this.loading = false
-          this.finished =
-            this.orderList.length >= res.data.queryDriverAllOrders_totalRecNum
+          this.finished = this.orderList.length >= res.data.queryDriverAllOrders_totalRecNum
         } else {
           console.log(res.data.rs)
           this.loading = false
@@ -563,16 +476,12 @@ export default {
       }).then(res => {
         if (res.data.rs === '1') {
           console.log('管理员未出行订单', res.data)
-          this.orderList = this.orderList.concat(
-            res.data.queryCarMercNotTrainOrders
-          )
+          this.orderList = this.orderList.concat(res.data.queryCarMercNotTrainOrders)
           this.totalNum = res.data.queryCarMercNotTrainOrders_totalRecNum
           this.list = this.orderList
           console.log('this.list', this.list)
           this.loading = false
-          this.finished =
-            this.orderList.length >=
-            res.data.queryCarMercNotTrainOrders_totalRecNum
+          this.finished = this.orderList.length >= res.data.queryCarMercNotTrainOrders_totalRecNum
         } else {
           console.log(res.data.rs)
           this.loading = false
@@ -588,16 +497,12 @@ export default {
       }).then(res => {
         if (res.data.rs === '1') {
           console.log('司机未出行订单', res.data)
-          this.orderList = this.orderList.concat(
-            res.data.queryDriverNotTrainOrders
-          )
+          this.orderList = this.orderList.concat(res.data.queryDriverNotTrainOrders)
           this.totalNum = res.data.queryDriverNotTrainOrders_totalRecNum
           this.list = this.orderList
           console.log('this.list', this.list)
           this.loading = false
-          this.finished =
-            this.orderList.length >=
-            res.data.queryDriverNotTrainOrders_totalRecNum
+          this.finished = this.orderList.length >= res.data.queryDriverNotTrainOrders_totalRecNum
         } else {
           console.log(res.data.rs)
           this.loading = false

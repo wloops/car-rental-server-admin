@@ -51,6 +51,7 @@
                     联系电话 : {{ item.mobile }}
                   </p>
                   <p>订单金额 : ￥{{ item.orderTotalPrice }}</p>
+                  <p v-if="item.remark">备注信息 : {{ item.remark }}</p>
                 </div>
 
                 <div
@@ -485,7 +486,11 @@ export default {
               this.onRefresh()
               this.$toast('取消订单成功')
             } else {
-              this.$toast(res.data.rs)
+              if (res.data.rs == '[-88505]OK') {
+                this.$toast('余额不足,退款失败')
+              } else {
+                this.$toast(res.data.rs)
+              }
             }
           })
         })
@@ -519,7 +524,11 @@ export default {
                 this.onRefresh()
                 this.$toast('取消订单成功')
               } else {
-                this.$toast(res.data.rs)
+                if (res.data.rs == '[-88505]OK') {
+                  this.$toast('余额不足,退款失败')
+                } else {
+                  this.$toast(res.data.rs)
+                }
               }
             })
           } else if (item.status === '13') {
@@ -529,7 +538,11 @@ export default {
                 this.onRefresh()
                 this.$toast('取消订单成功')
               } else {
-                this.$toast(res.data.rs)
+                if (res.data.rs == '[-88505]OK') {
+                  this.$toast('余额不足,退款失败')
+                } else {
+                  this.$toast(res.data.rs)
+                }
               }
             })
           }

@@ -145,7 +145,7 @@ import { Dialog, Toast } from 'vant'
 import { mapGetters, mapMutations } from 'vuex'
 import global_ from '@/global/config_global'
 import { getSmsCode, loginOfAccount, loginOfPhone } from '@/api/user'
-
+import { BASE_PROJECT } from '@/global/config'
 export default {
   name: 'login',
   components: {
@@ -581,7 +581,8 @@ export default {
                 // 登录成功返回上一级页面
                 // this.$router.go(-1)
                 // 根据用户权限跳转到不同的首页
-                if (res.data.TELLERROLE.indexOf('运动场地') > -1) {
+                // if (res.data.TELLERROLE.indexOf('运动场地') > -1) {
+                if (BASE_PROJECT === 'site') {
                   this.$router.push('/site')
                 } else {
                   this.$router.push('/')
