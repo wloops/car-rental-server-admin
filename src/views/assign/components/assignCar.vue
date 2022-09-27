@@ -1,27 +1,14 @@
 <template>
   <div class="assignCar">
     <div class="topNav">
-      <van-nav-bar
-        fixed
-        placeholder
-        left-text="主页"
-        title="指派车辆"
-        left-arrow
-        color="#000"
-        @click-left="onClickLeft"
-      />
+      <van-nav-bar fixed placeholder left-text="主页" title="指派车辆" left-arrow color="#000" @click-left="onClickLeft" />
     </div>
     <div class="carInfo">
       <h4>车辆信息</h4>
     </div>
     <van-form @submit="onSubmit">
       <!-- 出车时间 -->
-      <van-field
-        v-model="form.startTime"
-        name="time"
-        label="出车时间"
-        readonly
-      />
+      <van-field v-model="form.startTime" name="time" label="出车时间" readonly />
 
       <van-field
         readonly
@@ -34,35 +21,17 @@
         :rules="[{ required: true, message: '请选择车牌号码' }]"
       />
       <van-popup v-model="showCarID" position="bottom">
-        <van-picker
-          show-toolbar
-          :columns="carIDs"
-          @confirm="onConfirm"
-          @cancel="showCarID = false"
-        />
+        <van-picker show-toolbar :columns="carIDs" @confirm="onConfirm" @cancel="showCarID = false" />
       </van-popup>
-      <van-field
-        v-model="form.KilometersBefore"
-        name="KilometersBefore"
-        label="公里数"
-      />
+      <van-field v-model="form.KilometersBefore" name="KilometersBefore" label="公里数" />
       <van-field v-model="form.OilBefore" name="OilBefore" label="油量" />
       <div class="otherInfo">
         <h4>其它信息</h4>
-        <van-field
-          v-model="form.remark"
-          rows="3"
-          autosize
-          name="remark"
-          type="textarea"
-          placeholder="填写其它相关信息"
-        />
+        <van-field v-model="form.remark" rows="3" autosize name="remark" type="textarea" placeholder="填写其它相关信息" />
       </div>
 
       <div style="margin: 16px">
-        <van-button round block type="info" native-type="submit"
-          >确定出车</van-button
-        >
+        <van-button round block type="info" native-type="submit">确定出车</van-button>
       </div>
     </van-form>
   </div>
@@ -75,6 +44,7 @@ import {
   assignCarOfSelf,
   assignCarDeliveryCar,
   replaceAssignCar,
+  queryAvailableCarsNumberAffiliation,
 } from '@/api/assign'
 export default {
   name: 'assignCar',
@@ -106,24 +76,38 @@ export default {
   created() {
     this.loadAvailableCar()
     console.log('created car ', this.currentOrder)
-    this.form.startTime =
-      this.currentOrder.CARUSETIMEBEGIN + ' ' + this.currentOrder.orderStartTime
+    this.form.startTime = this.currentOrder.CARUSETIMEBEGIN + ' ' + this.currentOrder.orderStartTime
     this.form.billNo = this.currentOrder.billNo
   },
   mounted() {},
   methods: {
     loadAvailableCar() {
-      getAvailableCar({
-        carType: this.currentOrder.carType,
-      }).then(res => {
-        console.log('res', res)
-        if (res.data.rs !== '1') {
-          return false
-        }
-        this.carIDs = res.data.queryAvailableCarsNumber.map(item => {
-          return `${item.srlID}-${item.carNumber}-${item.carClassify}`
+      if (this.currentOrder.postName === '挂靠司机') {
+        queryAvailableCarsNumberAffiliation({
+          carType: this.currentOrder.carType,
+          subDriver: this.currentOrder.subDriver,
+        }).then(res => {
+          console.log('挂靠res', res.data)
+          if (res.data.rs !== '1') {
+            return false
+          }
+          this.carIDs = res.data.queryAvailableCarsNumberAffiliation.map(item => {
+            return `${item.srlID}-${item.carNumber}-${item.carClassify}`
+          })
         })
-      })
+      } else {
+        getAvailableCar({
+          carType: this.currentOrder.carType,
+        }).then(res => {
+          console.log('res', res)
+          if (res.data.rs !== '1') {
+            return false
+          }
+          this.carIDs = res.data.queryAvailableCarsNumber.map(item => {
+            return `${item.srlID}-${item.carNumber}-${item.carClassify}`
+          })
+        })
+      }
     },
     onClickLeft() {
       this.$router.go(-1)
@@ -225,22 +209,14 @@ export default {
             carID: carID,
             oilSrlID: '汽油',
             beginIndex: values.OilBefore ? values.OilBefore : '0',
-            beginMileage: values.KilometersBefore
-              ? values.KilometersBefore
-              : '0',
+            beginMileage: values.KilometersBefore ? values.KilometersBefore : '0',
           }
           if (this.currentOrder.carNumber === '') {
-            if (
-              this.currentOrder.orderDriveType === '自驾' &&
-              this.currentOrder.carPickUpMode === '自行取车'
-            ) {
+            if (this.currentOrder.orderDriveType === '自驾' && this.currentOrder.carPickUpMode === '自行取车') {
               // 调用租车单位自行提车
               params.miniProcNameForEngine = '租车单位自提车'
               this.loadAssignCarOfSelf(params)
-            } else if (
-              this.currentOrder.orderDriveType === '自驾' &&
-              this.currentOrder.carPickUpMode === '送车上门'
-            ) {
+            } else if (this.currentOrder.orderDriveType === '自驾' && this.currentOrder.carPickUpMode === '送车上门') {
               // 调用租车单位送车上门
               params.miniProcNameForEngine = '安排上门送车-不安排上门送车人员'
               params.personStatus = '3'
