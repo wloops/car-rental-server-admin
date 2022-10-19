@@ -74,6 +74,14 @@
                     >
                   </div>
                 </div>
+                <div class="orderBtn allBtn" v-if="userRole.indexOf('司机') > -1">
+                  <a :href="'tel:' + item.mobile">
+                    <van-button type="info" size="small"
+                    >联系客户</van-button
+                    >
+                  </a>
+
+                </div>
               </div>
             </van-grid-item>
           </van-grid>
@@ -81,6 +89,7 @@
         <div style="height: 3rem"></div>
       </van-pull-refresh>
     </div>
+    <a id="call-phone" :href="'tel:' + phone" style="display:hidden"></a>
   </div>
 </template>
 
@@ -130,6 +139,7 @@ export default {
   watch: {},
   created() {
     // this.onLoad()
+    this.userRole = window.localStorage.getItem('userRole')
   },
 
   mounted() {},
