@@ -23,8 +23,8 @@
       <van-popup v-model="showCarID" position="bottom">
         <van-picker show-toolbar :columns="carIDs" @confirm="onConfirm" @cancel="showCarID = false" />
       </van-popup>
-      <van-field v-model="form.KilometersBefore" name="KilometersBefore" label="公里数" />
-      <van-field v-model="form.OilBefore" name="OilBefore" label="油量" />
+      <!-- <van-field v-model="form.KilometersBefore" name="KilometersBefore" label="公里数" /> -->
+      <!-- <van-field v-model="form.OilBefore" name="OilBefore" label="油量" /> -->
       <div class="otherInfo">
         <h4>其它信息</h4>
         <van-field v-model="form.remark" rows="3" autosize name="remark" type="textarea" placeholder="填写其它相关信息" />

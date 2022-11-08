@@ -7,8 +7,8 @@ import JSEncrypt from 'jsencrypt'
 // 全局引入
 import { globalRegister } from './global'
 // 使用 vconsole 来调试
-import VConsole from 'vconsole'
-const vConsole = new VConsole()
+// import VConsole from 'vconsole'
+// const vConsole = new VConsole()
 
 /* 引入config文件模块 */
 import global_ from '@/global/config_global'
@@ -110,11 +110,7 @@ Vue.prototype.checklogin = function (callback) {
       storage.removeItem('adminMemberID')
       storage.removeItem('adminNickName')
       storage.removeItem('userAdmin')
-      console.log(
-        '登录过期',
-        'adminMemberID',
-        window.localStorage.getItem('adminMemberID')
-      )
+      console.log('登录过期', 'adminMemberID', window.localStorage.getItem('adminMemberID'))
       Dialog.alert({
         title: '提示',
         message: '登录过期,请重新登录',

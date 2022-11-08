@@ -1,29 +1,13 @@
 <template>
   <div class="returnCar">
     <div class="topNav">
-      <van-nav-bar
-        fixed
-        placeholder
-        left-text="主页"
-        title="还车"
-        left-arrow
-        color="#000"
-        @click-left="onClickLeft"
-      />
+      <van-nav-bar fixed placeholder left-text="主页" title="还车" left-arrow color="#000" @click-left="onClickLeft" />
     </div>
     <van-form @submit="onSubmit">
       <div class="costInfo">
         <h4>费用信息</h4>
       </div>
-      <van-field
-        readonly
-        clickable
-        colon
-        name="carNumber"
-        :value="form.carNumber"
-        label="车牌号码"
-        @click="showCarID = true"
-      />
+      <van-field readonly clickable colon name="carNumber" :value="form.carNumber" label="车牌号码" @click="showCarID = true" />
       <van-field
         readonly
         clickable
@@ -47,13 +31,7 @@
           @change="datetimeChange"
         />
       </van-popup>
-      <van-field
-        colon
-        readonly
-        v-model="form.useDays"
-        name="useDays"
-        label="使用时长(天)"
-      />
+      <van-field colon readonly v-model="form.useDays" name="useDays" label="使用时长(天)" />
       <van-field
         readonly
         clickable
@@ -87,19 +65,10 @@
         label="代驾服务费"
         placeholder="点击选择代驾服务费"
         @click="showReplaceDrivingCost"
-        :rules="
-          isReplaceDriving
-            ? [{ required: true, message: '请选择代驾服务费' }]
-            : ''
-        "
+        :rules="isReplaceDriving ? [{ required: true, message: '请选择代驾服务费' }] : ''"
       />
       <!-- <van-calendar v-model="showCalendar" @confirm="onConfirm" /> -->
-      <van-popup
-        v-model="isShowReplaceDrivingCost"
-        position="bottom"
-        round
-        :style="{ height: '35%' }"
-      >
+      <van-popup v-model="isShowReplaceDrivingCost" position="bottom" round :style="{ height: '35%' }">
         <van-picker
           show-toolbar
           title="选择代驾服务费"
@@ -109,33 +78,41 @@
           @cancel="isShowReplaceDrivingCost = !isShowReplaceDrivingCost"
         />
       </van-popup>
+      <van-field colon readonly v-model="basicFee" type="number" name="basicFee" label="车辆费用" />
       <van-field
         colon
-        readonly
-        v-model="basicFee"
+        required
+        v-model="form.KilometersBefore"
         type="number"
-        name="basicFee"
-        label="车辆费用"
+        name="KilometersBefore"
+        label="出车里程(km)"
+        placeholder="请填写出车里程"
+        @blur="countKm('KilometersBefore')"
       />
       <van-field
         colon
+        required
         v-model="form.KilometersAfter"
         type="number"
         name="KilometersAfter"
         label="收车里程(km)"
         placeholder="请填写收车里程"
-        @blur="countKm"
+        @blur="countKm('KilometersAfter')"
+      />
+      <van-field colon v-model="KilometersAll" name="KilometersAll" label="行驶里程(km)" readonly placeholder="自动计算出车前后的行驶里程" />
+      <van-field
+        colon
+        required
+        v-model="form.OilBefore"
+        type="number"
+        name="OilBefore"
+        label="出车油量(L)"
+        placeholder="请填写出车油量"
+        @blur="OilEnd"
       />
       <van-field
         colon
-        v-model="KilometersAll"
-        name="KilometersAll"
-        label="行驶里程(km)"
-        readonly
-        placeholder="自动计算出车前后的行驶里程"
-      />
-      <van-field
-        colon
+        required
         v-model="form.OilAfter"
         type="number"
         name="OilAfter"
@@ -143,22 +120,8 @@
         placeholder="请填写收车油量"
         @blur="OilEnd"
       />
-      <van-field
-        colon
-        v-model="form.roadFee"
-        type="number"
-        name="roadFee"
-        label="过路费"
-        placeholder="请填写过路费"
-      />
-      <van-field
-        v-model="form.roadTollRemark"
-        rows="1"
-        autosize
-        name="roadTollRemark"
-        type="textarea"
-        placeholder="请填写过路费备注信息"
-      />
+      <van-field colon v-model="form.roadFee" type="number" name="roadFee" label="过路费" placeholder="请填写过路费" />
+      <van-field v-model="form.roadTollRemark" rows="1" autosize name="roadTollRemark" type="textarea" placeholder="请填写过路费备注信息" />
       <!-- <van-field
         colon
         v-model="form.parkingFee"
@@ -228,35 +191,16 @@
           />
         </van-cell-group>
       </template> -->
-      <van-field
-        colon
-        v-model="form.otherFee"
-        type="number"
-        name="otherFee"
-        label="其他费用"
-      />
-      <van-field
-        v-model="form.otherFeesRemark"
-        rows="1"
-        autosize
-        name="otherFeesRemark"
-        type="textarea"
-        placeholder="请填写其它费用备注信息"
-      />
+      <van-field colon v-model="form.otherFee" type="number" name="otherFee" label="其他费用" />
+      <van-field v-model="form.otherFeesRemark" rows="1" autosize name="otherFeesRemark" type="textarea" placeholder="请填写其它费用备注信息" />
       <van-cell>
         <template #title>
           <span class="totalFee-title"
-            >费用总计 :<span class="totalFee" v-if="isChecked">{{
-              totalFee
-            }}</span></span
+            >费用总计 :<span class="totalFee" v-if="isChecked">{{ totalFee }}</span></span
           >
         </template>
         <template>
-          <van-switch
-            v-model="isChecked"
-            @input="countFee"
-            :disabled="isDisabled"
-          />
+          <van-switch v-model="isChecked" @input="countFee" :disabled="isDisabled" />
         </template>
       </van-cell>
       <van-field
@@ -269,11 +213,7 @@
         label="司机劳务费"
         placeholder="点击选择司机劳务费"
         @click="showDriverCost"
-        :rules="
-          isReplaceDriving
-            ? [{ required: true, message: '请选择司机劳务费' }]
-            : ''
-        "
+        :rules="isReplaceDriving ? [{ required: true, message: '请选择司机劳务费' }] : ''"
       />
       <!-- <van-calendar v-model="showCalendar" @confirm="onConfirm" /> -->
       <van-popup v-model="isShowDriverCost" position="bottom" round>
@@ -289,18 +229,9 @@
       <div class="OtherInfo">
         <h4>其它信息</h4>
       </div>
-      <van-field
-        v-model="form.remark"
-        rows="1"
-        autosize
-        name="remark"
-        type="textarea"
-        placeholder="请填写其它相关信息"
-      />
+      <van-field v-model="form.remark" rows="1" autosize name="remark" type="textarea" placeholder="请填写其它相关信息" />
       <div style="margin: 16px">
-        <van-button round block type="info" native-type="submit"
-          >确定还车</van-button
-        >
+        <van-button round block type="info" native-type="submit">确定还车</van-button>
       </div>
     </van-form>
   </div>
@@ -405,8 +336,7 @@ export default {
     }
     this.form = this.currentOrder
     this.days = Number(this.currentOrder.useDays)
-    this.form.endTime =
-      this.currentOrder.CARUSETIMEEND + ' ' + this.currentOrder.orderEndTime
+    this.form.endTime = this.currentOrder.CARUSETIMEEND + ' ' + this.currentOrder.orderEndTime
     this.form.endTime = dayjs(this.form.endTime).format('YYYY-MM-DD HH:mm')
     // 拆分日期和时间
     let date = this.form.endTime.split(' ')[0] // 日期 2019-01-01
@@ -555,6 +485,9 @@ export default {
       // 格式化日期和时间为 yyyymmdd 和hhmmss
       let dateFormat = date.replace(/-/g, '')
       let timeFormat = time.replace(/:/g, '') + '00'
+      if (timeFormat === '240000') {
+        timeFormat = '235959'
+      }
       let base_comname = window.localStorage.getItem('REALUSERNAME')
       let params = {
         srlIDForEngine: 'Splenwise微信预约点餐系统',
@@ -563,12 +496,13 @@ export default {
         miniProcNameForEngine: '租车单位自还车',
         billNo: this.currentOrder.billNo,
         saleCmpName: base_comname,
+        carType: this.currentOrder.carType,
         cardID: values.carNumber,
-        driver: this.currentOrder.retDriver
-          ? this.currentOrder.retDriver
-          : this.currentOrder.subDriver,
+        driver: this.currentOrder.retDriver ? this.currentOrder.retDriver : this.currentOrder.subDriver,
         returnDate: dateFormat,
         returnTime: timeFormat,
+        beginIndex: values.OilBefore,
+        beginMileage: values.KilometersBefore,
         endIndex: values.OilAfter.toString(), // 油量
         endMileage: values.KilometersAfter ? values.KilometersAfter : '0', // 行驶里程
         roadTollNum: '1',
@@ -592,25 +526,15 @@ export default {
         })
         .then(() => {
           // on confirm
-          if (
-            this.currentOrder.orderDriveType === '自驾' &&
-            this.currentOrder.carReturnMode === '自行还车'
-          ) {
+          if (this.currentOrder.orderDriveType === '自驾' && this.currentOrder.carReturnMode === '自行还车') {
             this.loadAssignReturnCarBySelf(params)
-          } else if (
-            this.currentOrder.orderDriveType === '自驾' &&
-            this.currentOrder.carReturnMode === '上门服务'
-          ) {
+          } else if (this.currentOrder.orderDriveType === '自驾' && this.currentOrder.carReturnMode === '上门服务') {
             params.miniProcNameForEngine = '租车单位签收还车'
-            ;(params.driverFee = this.replaceDrivingCostID
-              ? this.replaceDrivingCostID
-              : ''), // 代驾费用
+            ;(params.driverFee = this.replaceDrivingCostID ? this.replaceDrivingCostID : ''), // 代驾费用
               this.loadAssignReturnCarByService(params)
           } else {
             params.miniProcNameForEngine = '代驾还车'
-            ;(params.driverFee = this.replaceDrivingCostID
-              ? this.replaceDrivingCostID
-              : ''), // 代驾费用
+            ;(params.driverFee = this.replaceDrivingCostID ? this.replaceDrivingCostID : ''), // 代驾费用
               this.loadAssignReturnCar(params)
           }
         })
@@ -658,35 +582,47 @@ export default {
         this.trafficTicketTotal = 0.0
       }
     },
-    countKm() {
+    countKm(inputKey) {
       // 判断必填项是否为空
-      console.log(this.form.KilometersAfter, this.form.OilAfter)
+      // console.log(this.form.KilometersAfter, this.form.OilAfter)
       // if (!this.form.KilometersAfter) {
       //   this.isDisabled = true
       // } else {
       //   this.isDisabled = false
       // }
-      queryMileage({
-        billNo: this.currentOrder.billNo,
-        endMileage: this.form.KilometersAfter,
-      }).then(res => {
-        console.log('查询行驶里程', res)
-        if (res.data.rs === '1') {
-          if (res.data.queryMileage_totalRecNum === 0) {
-            this.$toast.fail(`出车里程没有录入，无法计算！`)
-            this.form.KilometersAfter = ''
-            return
-          }
-          let mileage = Number(res.data.queryMileage[0].mileage)
-          if (mileage > 0) {
-            this.KilometersAll = res.data.queryMileage[0].mileage
-          } else {
-            this.$toast.fail(
-              `结束里程须大于开始的${this.form.KilometersAfter - mileage}km`
-            )
+      // queryMileage({
+      //   billNo: this.currentOrder.billNo,
+      //   endMileage: this.form.KilometersAfter,
+      // }).then(res => {
+      //   console.log('查询行驶里程', res)
+      //   if (res.data.rs === '1') {
+      //     if (res.data.queryMileage_totalRecNum === 0) {
+      //       this.$toast.fail(`出车里程没有录入，无法计算！`)
+      //       this.form.KilometersAfter = ''
+      //       return
+      //     }
+      //     let mileage = Number(res.data.queryMileage[0].mileage)
+      //     if (mileage > 0) {
+      //       this.KilometersAll = res.data.queryMileage[0].mileage
+      //     } else {
+      //       this.$toast.fail(`结束里程须大于开始的${this.form.KilometersAfter - mileage}km`)
+      //     }
+      //   }
+      // })
+      if (this.form.KilometersBefore && this.form.KilometersAfter) {
+        let KilometersBefore = Number(this.form.KilometersBefore)
+        let KilometersAfter = Number(this.form.KilometersAfter)
+        console.log(KilometersBefore, KilometersAfter)
+        if (KilometersAfter >= KilometersBefore) {
+          this.KilometersAll = KilometersAfter - KilometersBefore
+        } else {
+          this.$toast.fail(`收车里程不应小于出车里程`)
+          if (inputKey) {
+            this.form[inputKey] = ''
+            this.KilometersAll = ''
           }
         }
-      })
+      }
     },
     OilEnd() {
       // 判断必填项是否为空
@@ -725,6 +661,8 @@ export default {
         billNo: this.currentOrder.billNo,
         returnDate: this.dateFormat,
         returnTime: this.timeFormat,
+        beginIndex: this.form.OilBefore ? this.form.OilBefore : '0',
+        beginMileage: this.form.KilometersBefore ? this.form.KilometersBefore : '0',
         endIndex: this.form.OilAfter ? this.form.OilAfter : '0',
         endMileage: this.form.KilometersAfter ? this.form.KilometersAfter : '0',
         roadTollAmt: this.form.roadFee ? this.form.roadFee : '0',
