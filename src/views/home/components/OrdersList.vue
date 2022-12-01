@@ -64,8 +64,11 @@
                     <van-button type="info" size="small" @click="toAssignCar(item)" v-if="assignCarBtn(item)">指派车辆</van-button>
                   </div>
                   <div class="orderBtn returnCar">
-                    <van-button type="info" size="small" @click="toReturnCar(item)" v-if="isReturnCar(item)">还车/计算费用</van-button>
+                    <van-button type="info" size="small" @click="updateStatus(item)" v-if="item.orderStatusShow === '已提车'">状态变更</van-button>
+                    <van-button type="info" size="small" @click="toReturnCar(item)" v-if="isReturnCar(item)">还车/计费</van-button>
                     <van-button type="info" size="small" @click="carDelivered(item)" v-if="item.orderStatusShow === '上门送车中'">已送达</van-button>
+                  </div>
+                  <div class="orderBtn">
                     <van-button class="cancelOrder" size="small" type="warning" @click="cancelOrder(item)" v-if="item.orderStatusShow !== '已还车'"
                       >取消订单</van-button
                     >
@@ -76,11 +79,8 @@
                 </div>
                 <div class="orderBtn allBtn" v-if="userRole.indexOf('司机') > -1">
                   <a :href="'tel:' + item.mobile">
-                    <van-button type="info" size="small"
-                    >联系客户</van-button
-                    >
+                    <van-button type="info" size="small">联系客户</van-button>
                   </a>
-
                 </div>
               </div>
             </van-grid-item>
@@ -89,13 +89,13 @@
         <div style="height: 3rem"></div>
       </van-pull-refresh>
     </div>
-    <a id="call-phone" :href="'tel:' + phone" style="display:hidden"></a>
+    <a id="call-phone" :href="'tel:' + phone" style="display: hidden"></a>
   </div>
 </template>
 
 <script>
 var dayjs = require('dayjs')
-import { getAllOrder, getWaitOrder, getAllOrderOfDriver, getWaitOrderOfDriver, setCancelOrder } from '@/api/order'
+import { getAllOrder, getWaitOrder, getAllOrderOfDriver, getWaitOrderOfDriver, setCancelOrder, ZCbtnUpdateDriverAndCarState } from '@/api/order'
 
 import { assignCarRentalCollectedCar } from '@/api/assign'
 
@@ -397,6 +397,36 @@ export default {
       this.$store.commit('order/setIsAssignDriver', false)
       this.$store.commit('order/setCurrentOrder', item)
       this.$router.push('/return')
+    },
+    updateStatus(item) {
+      console.log('更新状态', item)
+      // busiNameForEngine=汽车租赁业务
+      // busiFunNameForEngine=租车单位还车
+      // miniProcNameForEngine=还车-只修改司机和车辆的状态
+      // subDriver=惠保司机7
+      // carNumber=湘A·N249K
+      this.$dialog
+        .confirm({
+          title: '提示',
+          message: '是否要把指派司机及车辆的状态更新为可派？',
+        })
+        .then(() => {
+          ZCbtnUpdateDriverAndCarState({
+            srlIDForEngine: 'Splenwise微信预约点餐系统',
+            busiNameForEngine: '汽车租赁业务',
+            busiFunNameForEngine: '租车单位还车',
+            miniProcNameForEngine: '还车-只修改司机和车辆的状态',
+            subDriver: item.subDriver,
+            carNumber: item.carNumber,
+          }).then(res => {
+            if (res.data.rs === '1') {
+              this.onRefresh()
+              this.$toast.success('已更新')
+            } else {
+              this.$toast.fail(res.data.rs)
+            }
+          })
+        })
     },
     carDelivered(item) {
       // 上门送车中,调用时改为已提车

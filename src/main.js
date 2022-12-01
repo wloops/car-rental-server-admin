@@ -7,8 +7,8 @@ import JSEncrypt from 'jsencrypt'
 // 全局引入
 import { globalRegister } from './global'
 // 使用 vconsole 来调试
-// import VConsole from 'vconsole'
-// const vConsole = new VConsole()
+import VConsole from 'vconsole'
+const vConsole = new VConsole()
 
 /* 引入config文件模块 */
 import global_ from '@/global/config_global'

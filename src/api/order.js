@@ -86,3 +86,12 @@ export const setCancelOrder = params => {
     params,
   })
 }
+
+// (更新司机和车辆的指派状态)ZCbtnUpdateDriverAndCarState
+export const ZCbtnUpdateDriverAndCarState = data => {
+  return request({
+    method: 'POST',
+    url: '/insertReturn/ZCbtnUpdateDriverAndCarState',
+    data,
+  })
+}
