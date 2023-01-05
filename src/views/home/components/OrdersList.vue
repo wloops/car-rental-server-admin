@@ -217,6 +217,7 @@ export default {
           }
         }
         this.actions[0].text = `司机：${showdriver} [点击更换]`
+
       } else {
         if (item.orderDriveType === '自驾' && item.carPickUpMode === '自行取车' && item.carReturnMode === '自行还车') {
           this.actions[0].text = '自驾自取自还'
@@ -382,8 +383,30 @@ export default {
       this.onLoad()
     },
     toAssignCar(item) {
+      let showdriver = ''
+      if (item.delDriver !== '' || item.subDriver !== '' || item.retDriver !== '') {
+        if (item.subDriver) {
+          showdriver = `${item.subDriver}`
+        } else if (item.delDriver && item.retDriver) {
+          if (item.orderStatusShow === '上门收车中') {
+            showdriver = `${item.retDriver}`
+          } else {
+            showdriver = `${item.delDriver}`
+          }
+        } else {
+          if (item.delDriver) {
+            showdriver = `${item.delDriver}`
+          }
+          if (item.retDriver) {
+            showdriver = `${item.retDriver}`
+          }
+        }
+        this.showdriver = showdriver
+      }
+      let newItem = item
+      newItem.showDriver = this.showdriver
       this.$store.commit('order/setIsAssignDriver', true)
-      this.$store.commit('order/setCurrentOrder', item)
+      this.$store.commit('order/setCurrentOrder', newItem)
       this.$router.push('/assign')
     },
     toAssignDriver(item) {
