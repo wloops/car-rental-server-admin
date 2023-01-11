@@ -78,11 +78,10 @@ export default {
     this.loadAvailableCar()
     console.log('created car ', this.currentOrder)
     this.form.startTime = this.currentOrder.CARUSETIMEBEGIN + ' ' + this.currentOrder.orderStartTime
-    let startTimeSlot = dayjs(this.currentOrder.CARUSETIMEBEGIN).format('YYYY[年]M[月]D[日]') + this.currentOrder.orderStartTime
-    let endTimeSlot = dayjs(this.currentOrder.CARUSETIMEEND).format('YYYY[年]M[月]D[日]') + this.currentOrder.orderEndTime
-    this.rentalTimeSlot = startTimeSlot + ' - ' + endTimeSlot
-    console.log('rentalTimeSlot:', this.rentalTimeSlot)
-
+    // let startTimeSlot = dayjs(this.currentOrder.CARUSETIMEBEGIN).format('YYYY[年]M[月]D[日]') + this.currentOrder.orderStartTime
+    // let endTimeSlot = dayjs(this.currentOrder.CARUSETIMEEND).format('YYYY[年]M[月]D[日]') + this.currentOrder.orderEndTime
+    // this.rentalTimeSlot = startTimeSlot + ' - ' + endTimeSlot
+    // console.log('rentalTimeSlot:', this.rentalTimeSlot)
     this.form.billNo = this.currentOrder.billNo
   },
   mounted() {},
@@ -200,6 +199,10 @@ export default {
           let srlID = values.carID.split('-')[0]
           let carID = values.carID.split('-')[1]
 
+          let startYear = dayjs(this.currentOrder.CARUSETIMEBEGIN).format('YYYY')
+          let startMonth = dayjs(this.currentOrder.CARUSETIMEBEGIN).format('MM')
+          let startDate = dayjs(this.currentOrder.CARUSETIMEBEGIN).format('DD')
+
           let params = {
             srlIDForEngine: 'Splenwise微信预约点餐系统',
             busiNameForEngine: '汽车租赁业务',
@@ -218,7 +221,10 @@ export default {
             beginIndex: values.OilBefore ? values.OilBefore : '0',
             beginMileage: values.KilometersBefore ? values.KilometersBefore : '0',
             driver: this.currentOrder.showDriver,
-            serviceTime: this.rentalTimeSlot,
+            year: startYear,
+            month: startMonth,
+            date: startDate,
+            serviceTime: this.currentOrder.orderStartTime,
           }
           if (this.currentOrder.carNumber === '') {
             if (this.currentOrder.orderDriveType === '自驾' && this.currentOrder.carPickUpMode === '自行取车') {
